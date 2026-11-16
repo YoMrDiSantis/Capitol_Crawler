@@ -22,23 +22,27 @@
     { id: 'cyrus', name: 'Rep. Cyrus Boone', role: 'House Rules and Amendments', kind: 'favor' }
   ];
 
-  let { questions, committeeVotes, hasPowerUp, adaPrepared, rapport, onstudy, oncomplete }: {
+  let { questions, committeeVotes, hasPowerUp, superPacAvailable, adaPrepared, rapport, onstudy, onusesuperpac, oncomplete }: {
     questions: CivicsQuestion[];
     committeeVotes: number;
     hasPowerUp: boolean;
+    superPacAvailable: boolean;
     adaPrepared: boolean;
     rapport: number;
     onstudy: () => void;
+    onusesuperpac: () => void;
     oncomplete: (result: { approvals: number; amendments: string[] }) => void;
   } = $props();
 
   let index = $state(0);
-  let stage = $state<'intro' | 'question' | 'feedback'>('intro');
+  let stage = $state<'intro' | 'question' | 'feedback' | 'superpac'>('intro');
   let answer = $state('');
   let correct = $state(false);
   let approvals = $state(0);
   let amendments = $state<string[]>([]);
   let studyFound = $state(false);
+  let finalApprovals = $state(0);
+  let finalAmendments = $state<string[]>([]);
 
   let member = $derived(members[index]);
   let question = $derived(questions[index % questions.length]);
@@ -68,8 +72,11 @@
     const nextApprovals = correct ? approvals + 1 : approvals;
     const nextAmendments = correct && member.amendment ? [...amendments, member.amendment] : amendments;
 
-    if (nextApprovals >= 4 || index === members.length - 1) {
-      oncomplete({ approvals: nextApprovals, amendments: nextAmendments });
+    if (index === members.length - 1) {
+      finalApprovals = nextApprovals;
+      finalAmendments = nextAmendments;
+      if (superPacAvailable) stage = 'superpac';
+      else oncomplete({ approvals: nextApprovals, amendments: nextAmendments });
       return;
     }
 
@@ -78,6 +85,11 @@
     index += 1;
     answer = '';
     stage = 'intro';
+  }
+
+  function finishReview(useSuperPac: boolean) {
+    if (useSuperPac) onusesuperpac();
+    oncomplete({ approvals: finalApprovals + (useSuperPac ? 2 : 0), amendments: finalAmendments });
   }
 </script>
 
@@ -130,13 +142,22 @@
           {/each}
         </div>
       </section>
-    {:else}
+    {:else if stage === 'feedback'}
       <section class:wrong={!correct} class="feedback">
         <span class="feedback-icon">{correct ? '✓' : '×'}</span>
         <h3>{correct ? 'COMMITTEE APPROVAL' : 'COMMITTEE REJECTION'}</h3>
         <p>{correct ? member.kind === 'readiness' ? committeeDialogue.otisReadySuccess : member.kind === 'favor' ? committeeDialogue.clerkSuccess : approvalDialogue : `${committeeDialogue.rejection} One accepted answer is “${question.acceptedAnswers[0]}.”`}</p>
       </section>
-      <button class="primary" onclick={continueMarkup}>{correct && approvals + 1 >= 4 ? 'PASS MARKUP' : index === members.length - 1 ? 'RETURN TO HOUSE' : 'NEXT COMMITTEE MEMBER'} →</button>
+      <button class="primary" onclick={continueMarkup}>{index === members.length - 1 ? 'COMPLETE COMMITTEE REVIEW' : 'NEXT COMMITTEE MEMBER'} →</button>
+    {:else}
+      <section class="committee-copy">
+        <p class="eyebrow">ALL SEVEN MEMBERS HEARD</p>
+        <h3>{finalApprovals} / 4 APPROVALS</h3>
+        <p>The Committee has completed every review. You may now use a Super PAC to add two approvals to the final count.</p>
+        <p class="committee-note">This support is only counted after all seven Committee members have been heard.</p>
+      </section>
+      <button class="primary" onclick={() => finishReview(true)}>USE SUPER PAC · +2 APPROVALS</button>
+      <button class="text-button" onclick={() => finishReview(false)}>FINISH WITHOUT SUPER PAC</button>
     {/if}
 
     <footer>FULL COMMITTEE SUPPORT: {committeeVotes} HOUSE VOTES · INCOMPLETE MARKUP: 15 HOUSE VOTES</footer>

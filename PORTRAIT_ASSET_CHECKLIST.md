@@ -2,13 +2,19 @@
 
 Use this document as a build checklist for final portrait and sprite assets.
 
+## Folder Audit (August 13, 2026)
+
+- The files marked complete below are present in `public/assets/portraits/`.
+- The current portrait files are `1024 x 1024` RGB PNGs. They are not yet transparent, pixel-sized exports, so the applicable export rules remain open.
+- Visual requirements and the "no baked text" rule require a visual review and remain open.
+
 ## Export Rules
 
 - [ ] Export every portrait as a transparent PNG.
 - [ ] Use `48 x 48` pixels when possible.
 - [ ] `96 x 96` pixels is acceptable if every expression for that character uses the same size.
-- [ ] Export one expression per file.
-- [ ] Use lowercase kebab-case filenames exactly as listed.
+- [x] Export one expression per file.
+- [x] Use lowercase kebab-case filenames exactly as listed.
 - [ ] Do not bake names or dialogue text into portrait images.
 
 ## President Anthony J. DiSantis
@@ -24,10 +30,10 @@ Visual requirements:
 
 Portrait files:
 
-- [ ] `president-disantis-neutral.png`
-- [ ] `president-disantis-pleased.png`
-- [ ] `president-disantis-thoughtful.png`
-- [ ] `president-disantis-concerned.png`
+- [x] `president-disantis-neutral.png`
+- [x] `president-disantis-pleased.png`
+- [x] `president-disantis-thoughtful.png`
+- [x] `president-disantis-concerned.png`
 - [ ] `president-disantis-grin.png`
 
 ## Sutton DiSantis
@@ -40,10 +46,10 @@ Visual requirements:
 
 Portrait files:
 
-- [ ] `sutton-disantis-neutral.png`
-- [ ] `sutton-disantis-pleased.png`
-- [ ] `sutton-disantis-excited.png`
-- [ ] `sutton-disantis-concerned.png`
+- [x] `sutton-disantis-neutral.png`
+- [x] `sutton-disantis-pleased.png`
+- [x] `sutton-disantis-excited.png`
+- [x] `sutton-disantis-concerned.png`
 
 ## Mr. Ben Venello
 
@@ -57,10 +63,10 @@ Visual requirements:
 
 Portrait files:
 
-- [ ] `ben-venello-welcoming.png`
-- [ ] `ben-venello-thoughtful.png`
-- [ ] `ben-venello-encouraging.png`
-- [ ] `ben-venello-concerned.png`
+- [x] `ben-venello-welcoming.png`
+- [x] `ben-venello-thoughtful.png`
+- [x] `ben-venello-encouraging.png`
+- [x] `ben-venello-concerned.png`
 
 ## Abner Mendoza, Press Secretary
 
@@ -72,88 +78,88 @@ Visual requirements:
 
 Portrait files:
 
-- [ ] `abner-mendoza-neutral.png`
-- [ ] `abner-mendoza-thoughtful.png`
-- [ ] `abner-mendoza-concerned.png`
-- [ ] `abner-mendoza-pleased.png`
+- [x] `abner-mendoza-neutral.png`
+- [x] `abner-mendoza-thoughtful.png`
+- [x] `abner-mendoza-concerned.png`
+- [x] `abner-mendoza-pleased.png`
 
 ## Priority House Leaders
 
 ### Wren Castellano
 
-- [ ] `wren-castellano-neutral.png`
-- [ ] `wren-castellano-pleased.png`
-- [ ] `wren-castellano-thoughtful.png`
-- [ ] `wren-castellano-concerned.png`
+- [x] `wren-castellano-neutral.png`
+- [x] `wren-castellano-pleased.png`
+- [x] `wren-castellano-thoughtful.png`
+- [x] `wren-castellano-concerned.png`
 
 ### Sarah Sterling
 
-- [ ] `sarah-sterling-neutral.png`
-- [ ] `sarah-sterling-pleased.png`
-- [ ] `sarah-sterling-thoughtful.png`
-- [ ] `sarah-sterling-concerned.png`
+- [x] `sarah-sterling-neutral.png`
+- [x] `sarah-sterling-pleased.png`
+- [x] `sarah-sterling-thoughtful.png`
+- [x] `sarah-sterling-concerned.png`
 
 ### Diane Okafor
 
-- [ ] `diane-okafor-neutral.png`
-- [ ] `diane-okafor-pleased.png`
-- [ ] `diane-okafor-thoughtful.png`
-- [ ] `diane-okafor-concerned.png`
+- [x] `diane-okafor-neutral.png`
+- [x] `diane-okafor-pleased.png`
+- [x] `diane-okafor-thoughtful.png`
+- [x] `diane-okafor-concerned.png`
 
 ### Tom Bracewell
 
-- [ ] `tom-bracewell-neutral.png`
-- [ ] `tom-bracewell-pleased.png`
-- [ ] `tom-bracewell-thoughtful.png`
-- [ ] `tom-bracewell-concerned.png`
+- [x] `tom-bracewell-neutral.png`
+- [x] `tom-bracewell-pleased.png`
+- [x] `tom-bracewell-thoughtful.png`
+- [x] `tom-bracewell-concerned.png`
 
 ### Marcus Vance
 
-- [ ] `marcus-vance-neutral.png`
-- [ ] `marcus-vance-pleased.png`
-- [ ] `marcus-vance-thoughtful.png`
-- [ ] `marcus-vance-concerned.png`
+- [x] `marcus-vance-neutral.png`
+- [x] `marcus-vance-pleased.png`
+- [x] `marcus-vance-thoughtful.png`
+- [x] `marcus-vance-concerned.png`
 
 ## Priority Senate Leaders
 
 ### Eleanor Vance
 
-- [ ] `eleanor-vance-neutral.png`
-- [ ] `eleanor-vance-pleased.png`
-- [ ] `eleanor-vance-thoughtful.png`
-- [ ] `eleanor-vance-concerned.png`
+- [x] `eleanor-vance-neutral.png`
+- [x] `eleanor-vance-pleased.png`
+- [x] `eleanor-vance-thoughtful.png`
+- [x] `eleanor-vance-concerned.png`
 
 ### Regina Alvarez
 
-- [ ] `regina-alvarez-neutral.png`
-- [ ] `regina-alvarez-pleased.png`
-- [ ] `regina-alvarez-thoughtful.png`
-- [ ] `regina-alvarez-concerned.png`
+- [x] `regina-alvarez-neutral.png`
+- [x] `regina-alvarez-pleased.png`
+- [x] `regina-alvarez-thoughtful.png`
+- [x] `regina-alvarez-concerned.png`
 
 ### Augustus "The Anchor" Kane
 
-- [ ] `augustus-kane-neutral.png`
-- [ ] `augustus-kane-pleased.png`
-- [ ] `augustus-kane-thoughtful.png`
-- [ ] `augustus-kane-concerned.png`
-- [ ] `augustus-kane-commanding.png`
+- [x] `augustus-kane-neutral.png`
+- [x] `augustus-kane-pleased.png`
+- [x] `augustus-kane-thoughtful.png`
+- [x] `augustus-kane-concerned.png`
+- [x] `augustus-kane-commanding.png`
 
 ### Lucia Marchetti
 
-- [ ] `lucia-marchetti-neutral.png`
-- [ ] `lucia-marchetti-pleased.png`
-- [ ] `lucia-marchetti-thoughtful.png`
-- [ ] `lucia-marchetti-concerned.png`
-- [ ] `lucia-marchetti-intense.png`
+- [x] `lucia-marchetti-neutral.png`
+- [x] `lucia-marchetti-pleased.png`
+- [x] `lucia-marchetti-thoughtful.png`
+- [x] `lucia-marchetti-concerned.png`
+- [x] `lucia-marchetti-intense.png`
 
 ## Supporting Staff Portraits
 
-- [ ] `committee-clerk-hiroshi-tanaka-neutral.png`
-- [ ] `committee-clerk-hiroshi-tanaka-pleased.png`
-- [ ] `cloakroom-staffer-neutral.png`
-- [ ] `press-row-intern-neutral.png`
-- [ ] `west-wing-briefer-neutral.png`
-- [ ] `west-wing-operations-aide-neutral.png`
+- [x] `committee-clerk-hiroshi-tanaka-neutral.png`
+- [x] `committee-clerk-hiroshi-tanaka-pleased.png`
+- [x] `cloakroom-staffer-neutral.png`
+- [x] `press-row-intern-neutral.png`
+- [x] `west-wing-briefer-neutral.png`
+- [x] `west-wing-operations-aide-neutral.png`
 
 ## Ghost Portraits
 
@@ -164,10 +170,10 @@ Visual requirements:
 
 Files:
 
-- [ ] `ghost-washington-neutral.png`
-- [ ] `ghost-washington-thoughtful.png`
-- [ ] `ghost-lincoln-neutral.png`
-- [ ] `ghost-lincoln-thoughtful.png`
+- [x] `ghost-washington-neutral.png`
+- [x] `ghost-washington-thoughtful.png`
+- [x] `ghost-lincoln-neutral.png`
+- [x] `ghost-lincoln-thoughtful.png`
 
 ## Optional Map Sprites
 
@@ -236,6 +242,6 @@ sprites/
 4. [ ] Abner Mendoza portrait set
 5. [ ] Wren, Sarah, Diane, Tom, and Marcus
 6. [ ] Eleanor, Regina, Kane, and Lucia
-7. [ ] Staff and ghost portraits
+7. [x] Staff and ghost portraits
 8. [ ] Standing sprites
 9. [ ] Walking sprite sheets

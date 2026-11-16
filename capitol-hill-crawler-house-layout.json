@@ -1,0 +1,1544 @@
+{
+  "version": 1,
+  "hideBuiltInDesks": false,
+  "props": [
+    {
+      "id": "house-prop-1788538750019-ps2o7",
+      "type": "desk",
+      "x": 2784,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538760317-f08tm",
+      "type": "desk",
+      "x": 2640,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538764168-ubc88",
+      "type": "desk",
+      "x": 2496,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538767200-2q174",
+      "type": "desk",
+      "x": 2352,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538772105-8k5v3",
+      "type": "desk",
+      "x": 2208,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538789643-iz4gn",
+      "type": "desk",
+      "x": 2208,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538791969-181s6",
+      "type": "desk",
+      "x": 2352,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538793244-vid1l",
+      "type": "desk",
+      "x": 2496,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538794464-tqg54",
+      "type": "desk",
+      "x": 2640,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538795880-asa9q",
+      "type": "desk",
+      "x": 2784,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538797899-1t91b",
+      "type": "desk",
+      "x": 2928,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538799530-nlaz8",
+      "type": "desk",
+      "x": 3072,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538801318-66eyl",
+      "type": "desk",
+      "x": 3216,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538803223-eyt57",
+      "type": "desk",
+      "x": 3360,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538851470-u9elz",
+      "type": "desk",
+      "x": 2208,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538853609-83oq7",
+      "type": "desk",
+      "x": 2352,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538856817-0bp58",
+      "type": "desk",
+      "x": 2496,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538857231-xj14h",
+      "type": "desk",
+      "x": 2496,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538859234-2jmwx",
+      "type": "desk",
+      "x": 2640,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538860791-8cld6",
+      "type": "desk",
+      "x": 2784,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538862345-9ukot",
+      "type": "desk",
+      "x": 2928,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538864273-0ao8a",
+      "type": "desk",
+      "x": 3072,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538865541-3raft",
+      "type": "desk",
+      "x": 3216,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538866893-f1xi0",
+      "type": "desk",
+      "x": 3360,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538868211-31bun",
+      "type": "desk",
+      "x": 3504,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538869702-c0y3f",
+      "type": "desk",
+      "x": 3648,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538871471-eav7q",
+      "type": "desk",
+      "x": 3792,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538873987-844qw",
+      "type": "desk",
+      "x": 3936,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538875447-ksemk",
+      "type": "desk",
+      "x": 4080,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538953175-xmeal",
+      "type": "desk",
+      "x": 3648,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538958605-fj7or",
+      "type": "desk",
+      "x": 3504,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538960904-q63sx",
+      "type": "desk",
+      "x": 3792,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538962132-zrb6v",
+      "type": "desk",
+      "x": 3936,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538963197-3gv6g",
+      "type": "desk",
+      "x": 4080,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538967765-63zdr",
+      "type": "desk",
+      "x": 4080,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538969510-7mmvj",
+      "type": "desk",
+      "x": 3936,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538970630-hqs0u",
+      "type": "desk",
+      "x": 3792,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538971752-qlpnk",
+      "type": "desk",
+      "x": 3648,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538972902-ko2yz",
+      "type": "desk",
+      "x": 3504,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538974016-3scv1",
+      "type": "desk",
+      "x": 3360,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538975045-3lyc9",
+      "type": "desk",
+      "x": 3216,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538976096-mlgig",
+      "type": "desk",
+      "x": 3072,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538977253-4332m",
+      "type": "desk",
+      "x": 2928,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538978355-ihom8",
+      "type": "desk",
+      "x": 2784,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538979606-8t7hl",
+      "type": "desk",
+      "x": 2640,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538980862-cjhla",
+      "type": "desk",
+      "x": 2496,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538981947-e6lyz",
+      "type": "desk",
+      "x": 2352,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538983137-ablef",
+      "type": "desk",
+      "x": 2208,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788538994005-y5qx9",
+      "type": "desk",
+      "x": 4224,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538996922-wkeof",
+      "type": "desk",
+      "x": 4368,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788538999540-kerk2",
+      "type": "desk",
+      "x": 4512,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539000991-6is8l",
+      "type": "desk",
+      "x": 4656,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539002499-uv3wd",
+      "type": "desk",
+      "x": 4800,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539003759-m78zs",
+      "type": "desk",
+      "x": 4944,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539004951-tmy47",
+      "type": "desk",
+      "x": 5088,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539006155-qai46",
+      "type": "desk",
+      "x": 5232,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539007374-sfrk5",
+      "type": "desk",
+      "x": 5376,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539008650-4eqte",
+      "type": "desk",
+      "x": 5520,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539009924-ujsoi",
+      "type": "desk",
+      "x": 5664,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539011193-l7xp0",
+      "type": "desk",
+      "x": 5808,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788539012489-e2b82",
+      "type": "desk",
+      "x": 5952,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961239216-ak0n3",
+      "type": "desk",
+      "x": 3120,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961241597-1nxos",
+      "type": "desk",
+      "x": 3264,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961243496-uhccj",
+      "type": "desk",
+      "x": 3408,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961245129-riz2j",
+      "type": "desk",
+      "x": 3552,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961246594-u3iy4",
+      "type": "desk",
+      "x": 3696,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961248434-4e4bv",
+      "type": "desk",
+      "x": 3840,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961250158-u1ar1",
+      "type": "desk",
+      "x": 3984,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961252021-h1cxf",
+      "type": "desk",
+      "x": 4128,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961253695-d1a98",
+      "type": "desk",
+      "x": 4272,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961255329-jsd3q",
+      "type": "desk",
+      "x": 4416,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961257875-jbuoz",
+      "type": "desk",
+      "x": 4560,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961336747-99vw3",
+      "type": "desk",
+      "x": 4704,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961338329-lgp5b",
+      "type": "desk",
+      "x": 4848,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961339813-vw7y2",
+      "type": "desk",
+      "x": 4992,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788961341440-36t6l",
+      "type": "desk",
+      "x": 5136,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961342990-kgj1t",
+      "type": "desk",
+      "x": 5280,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961344592-dczb9",
+      "type": "desk",
+      "x": 5424,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961345991-gn7w4",
+      "type": "desk",
+      "x": 5568,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961347612-1wfv3",
+      "type": "desk",
+      "x": 5712,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961349659-jeaib",
+      "type": "desk",
+      "x": 5856,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961351410-b1u42",
+      "type": "desk",
+      "x": 6000,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961353146-x3hgq",
+      "type": "desk",
+      "x": 6144,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961354611-86waf",
+      "type": "desk",
+      "x": 6288,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961355955-a2zeg",
+      "type": "desk",
+      "x": 6432,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961357447-7ruji",
+      "type": "desk",
+      "x": 6576,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961358932-8l03x",
+      "type": "desk",
+      "x": 6720,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961360326-bsa2g",
+      "type": "desk",
+      "x": 6864,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961376229-th8ai",
+      "type": "desk",
+      "x": 6864,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961393483-xb8et",
+      "type": "desk",
+      "x": 6720,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961394618-jy434",
+      "type": "desk",
+      "x": 6576,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961395662-chsmw",
+      "type": "desk",
+      "x": 6432,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961396412-vgvd4",
+      "type": "desk",
+      "x": 6288,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961397211-n4auh",
+      "type": "desk",
+      "x": 6144,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961397952-tdl0g",
+      "type": "desk",
+      "x": 6000,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961398730-lgcia",
+      "type": "desk",
+      "x": 5856,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961399512-kdygy",
+      "type": "desk",
+      "x": 5712,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961400355-m4nuy",
+      "type": "desk",
+      "x": 5568,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961401512-mhjup",
+      "type": "desk",
+      "x": 5424,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788961402499-fjwt3",
+      "type": "desk",
+      "x": 5280,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961403654-nzgqi",
+      "type": "desk",
+      "x": 5136,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961404509-oaa9f",
+      "type": "desk",
+      "x": 4992,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961405363-vul3s",
+      "type": "desk",
+      "x": 4848,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961406177-wybw9",
+      "type": "desk",
+      "x": 4704,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961406876-6z5a7",
+      "type": "desk",
+      "x": 4560,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961407661-wsi4t",
+      "type": "desk",
+      "x": 4416,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961408320-4my1s",
+      "type": "desk",
+      "x": 4272,
+      "y": 720,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961410428-gkubt",
+      "type": "desk",
+      "x": 4272,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788961411088-lj1lx",
+      "type": "desk",
+      "x": 4272,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961412551-0ybph",
+      "type": "desk",
+      "x": 4416,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961413964-l3q01",
+      "type": "desk",
+      "x": 4560,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788961414193-zyp62",
+      "type": "desk",
+      "x": 4560,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961414961-ox23i",
+      "type": "desk",
+      "x": 4704,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961415955-id30l",
+      "type": "desk",
+      "x": 4848,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961417124-ja6z4",
+      "type": "desk",
+      "x": 4992,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788961417482-nrkli",
+      "type": "desk",
+      "x": 4992,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961418694-65gvc",
+      "type": "desk",
+      "x": 5136,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961419646-dae0v",
+      "type": "desk",
+      "x": 5280,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961420704-9p78c",
+      "type": "desk",
+      "x": 5424,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961421642-y214f",
+      "type": "desk",
+      "x": 5568,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961422526-9r435",
+      "type": "desk",
+      "x": 5712,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961423435-rtfkq",
+      "type": "desk",
+      "x": 5856,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961433999-1m3jo",
+      "type": "desk",
+      "x": 6000,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961439456-o1vit",
+      "type": "desk",
+      "x": 6144,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961440480-l7nq9",
+      "type": "desk",
+      "x": 6288,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961441440-7nqoa",
+      "type": "desk",
+      "x": 6432,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961442216-npuqy",
+      "type": "desk",
+      "x": 6576,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961442959-l0ggn",
+      "type": "desk",
+      "x": 6720,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961443687-5nfvh",
+      "type": "desk",
+      "x": 6864,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961448122-7gl1t",
+      "type": "desk",
+      "x": 6144,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961449851-jkonm",
+      "type": "desk",
+      "x": 6288,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961450783-eq78e",
+      "type": "desk",
+      "x": 6432,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961451671-oolh6",
+      "type": "desk",
+      "x": 6576,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788961452511-qg90n",
+      "type": "desk",
+      "x": 6720,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0
+    },
+    {
+      "id": "house-prop-1788961453293-jryed",
+      "type": "desk",
+      "x": 6864,
+      "y": 1056,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": true
+    },
+    {
+      "id": "house-prop-1788962264962-9prh4",
+      "type": "lectern",
+      "x": 2976,
+      "y": 624,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967077987-cpok2",
+      "type": "lectern",
+      "x": 4512,
+      "y": 432,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967088003-2nqa7",
+      "type": "bench",
+      "x": 5184,
+      "y": 160,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967089949-9xnaz",
+      "type": "bench",
+      "x": 5712,
+      "y": 160,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967091771-rnzea",
+      "type": "bench",
+      "x": 6480,
+      "y": 160,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967094421-y8yp8",
+      "type": "bench",
+      "x": 6912,
+      "y": 160,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967100411-dyji3",
+      "type": "bench",
+      "x": 7632,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967102875-ix3rp",
+      "type": "bench",
+      "x": 7632,
+      "y": 624,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967113446-e49u9",
+      "type": "bench",
+      "x": 8256,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967115277-ynr1u",
+      "type": "bench",
+      "x": 8736,
+      "y": 576,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967117255-w2oz0",
+      "type": "bench",
+      "x": 8736,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967119618-tb74n",
+      "type": "bench",
+      "x": 8256,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967133927-oywsk",
+      "type": "bench",
+      "x": 720,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967135211-ysnik",
+      "type": "bench",
+      "x": 288,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967137399-a5nld",
+      "type": "bench",
+      "x": 288,
+      "y": 528,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967141084-yb9rz",
+      "type": "bench",
+      "x": 768,
+      "y": 528,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967148145-5hhtz",
+      "type": "bench",
+      "x": 1296,
+      "y": 864,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967150289-x036u",
+      "type": "bench",
+      "x": 1296,
+      "y": 1200,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967153754-7f8p7",
+      "type": "bench",
+      "x": 1488,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967155372-942o1",
+      "type": "bench",
+      "x": 1296,
+      "y": 288,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967164499-xicpx",
+      "type": "bench",
+      "x": 4272,
+      "y": 1248,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    },
+    {
+      "id": "house-prop-1788967166502-6cp03",
+      "type": "bench",
+      "x": 4560,
+      "y": 1248,
+      "width": 1,
+      "height": 1,
+      "rotation": 0,
+      "mirrored": false
+    }
+  ]
+}

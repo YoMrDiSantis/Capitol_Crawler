@@ -7,7 +7,7 @@
     venello: '--skin:#d39a73;--hair:#49312b;--suit:#4a6078;--tie:#d7a54e',
     player: '--skin:#d8a57c;--hair:#49312b;--suit:#2f5876;--tie:#e8b956',
     npc: '--skin:#c98767;--hair:#3c2c2b;--suit:#5d7184;--tie:#d4a85c',
-    wren: '--skin:#b97758;--hair:#49312b;--suit:#547a98;--tie:#e8b956', sterling: '--skin:#d69a74;--hair:#8b5a42;--suit:#b34f52;--tie:#f2d180', diane: '--skin:#704634;--hair:#272426;--suit:#405f7d;--tie:#db9c4f', tom: '--skin:#d8a47b;--hair:#bdc2c5;--suit:#6a725f;--tie:#b15047', marcus: '--skin:#633d31;--hair:#20252d;--suit:#426b83;--tie:#d26d61', eleanor: '--skin:#c18462;--hair:#495b6c;--suit:#507b7c;--tie:#e1b15a', kane: '--skin:#9b6249;--hair:#2d2524;--suit:#6b3b42;--tie:#e0ab56', lucia: '--skin:#d49a78;--hair:#26232d;--suit:#624f83;--tie:#d8d4dd'
+    wren: '--skin:#b97758;--hair:#49312b;--suit:#547a98;--tie:#e8b956', sterling: '--skin:#d69a74;--hair:#8b5a42;--suit:#b34f52;--tie:#f2d180', diane: '--skin:#704634;--hair:#272426;--suit:#405f7d;--tie:#db9c4f', tom: '--skin:#d8a47b;--hair:#bdc2c5;--suit:#6a725f;--tie:#b15047', marcus: '--skin:#633d31;--hair:#20252d;--suit:#426b83;--tie:#d26d61', eleanor: '--skin:#c18462;--hair:#495b6c;--suit:#507b7c;--tie:#e1b15a', regina: '--skin:#9c6049;--hair:#3c2925;--suit:#8d4e58;--tie:#e1b15a', kane: '--skin:#9b6249;--hair:#2d2524;--suit:#6b3b42;--tie:#e0ab56', lucia: '--skin:#d49a78;--hair:#26232d;--suit:#624f83;--tie:#d8d4dd'
   };
   const portraitImages: Record<string, Partial<Record<PortraitMood, string>>> = {
     president: {
@@ -22,11 +22,35 @@
     wren: {
       neutral: '/assets/portraits/wren-castellano-neutral.png', pleased: '/assets/portraits/wren-castellano-pleased.png', thoughtful: '/assets/portraits/wren-castellano-thoughtful.png', concerned: '/assets/portraits/wren-castellano-concerned.png'
     },
+    eleanor: {
+      neutral: '/assets/portraits/eleanor-vance-neutral.png', pleased: '/assets/portraits/eleanor-vance-pleased.png', thoughtful: '/assets/portraits/eleanor-vance-thoughtful.png', concerned: '/assets/portraits/eleanor-vance-concerned.png'
+    },
+    sterling: {
+      neutral: '/assets/portraits/sarah-sterling-neutral.png', pleased: '/assets/portraits/sarah-sterling-pleased.png', thoughtful: '/assets/portraits/sarah-sterling-thoughtful.png', concerned: '/assets/portraits/sarah-sterling-concerned.png'
+    },
+    diane: {
+      neutral: '/assets/portraits/diane-okafor-neutral.png', pleased: '/assets/portraits/diane-okafor-pleased.png', thoughtful: '/assets/portraits/diane-okafor-thoughtful.png', concerned: '/assets/portraits/diane-okafor-concerned.png'
+    },
+    tom: {
+      neutral: '/assets/portraits/tom-bracewell-neutral.png', pleased: '/assets/portraits/tom-bracewell-pleased.png', thoughtful: '/assets/portraits/tom-bracewell-thoughtful.png', concerned: '/assets/portraits/tom-bracewell-concerned.png'
+    },
+    marcus: {
+      neutral: '/assets/portraits/marcus-vance-neutral.png', pleased: '/assets/portraits/marcus-vance-pleased.png', thoughtful: '/assets/portraits/marcus-vance-thoughtful.png', concerned: '/assets/portraits/marcus-vance-concerned.png'
+    },
+    regina: {
+      neutral: '/assets/portraits/regina-alvarez-neutral.png', pleased: '/assets/portraits/regina-alvarez-pleased.png', thoughtful: '/assets/portraits/regina-alvarez-thoughtful.png', concerned: '/assets/portraits/regina-alvarez-concerned.png'
+    },
+    kane: {
+      neutral: '/assets/portraits/augustus-kane-neutral.png', pleased: '/assets/portraits/augustus-kane-pleased.png', thoughtful: '/assets/portraits/augustus-kane-thoughtful.png', concerned: '/assets/portraits/augustus-kane-concerned.png'
+    },
+    lucia: {
+      neutral: '/assets/portraits/lucia-marchetti-neutral.png', pleased: '/assets/portraits/lucia-marchetti-pleased.png', thoughtful: '/assets/portraits/lucia-marchetti-thoughtful.png', concerned: '/assets/portraits/lucia-marchetti-concerned.png'
+    },
     abner: {
       neutral: '/assets/portraits/abner-mendoza-neutral.png', pleased: '/assets/portraits/abner-mendoza-pleased.png', thoughtful: '/assets/portraits/abner-mendoza-thoughtful.png', concerned: '/assets/portraits/abner-mendoza-concerned.png'
     }
   };
-  let named = $derived(character === 'npc' ? (name.toLowerCase().includes('wren')?'wren':name.toLowerCase().includes('sterling')?'sterling':name.toLowerCase().includes('diane')?'diane':name.toLowerCase().includes('bracewell')?'tom':name.toLowerCase().includes('marcus')?'marcus':name.toLowerCase().includes('eleanor')?'eleanor':name.toLowerCase().includes('kane')?'kane':name.toLowerCase().includes('marchetti')?'lucia':'npc') : character);
+  let named = $derived(character === 'npc' ? (name.toLowerCase().includes('wren') ? 'wren' : name.toLowerCase().includes('sterling') ? 'sterling' : name.toLowerCase().includes('diane') ? 'diane' : name.toLowerCase().includes('anand') ? 'priya' : name.toLowerCase().includes('bracewell') ? 'tom' : name.toLowerCase().includes('marcus') ? 'marcus' : name.toLowerCase().includes('eleanor') ? 'eleanor' : name.toLowerCase().includes('alvarez') ? 'regina' : name.toLowerCase().includes('kane') ? 'kane' : name.toLowerCase().includes('marchetti') ? 'lucia' : 'npc') : character);
   let portraitStyle = $derived(`${styles[named] ?? styles.npc}${character === 'player' && skinTone ? `;--skin:${skinTone}` : ''}${character === 'player' && presentation ? `;--hair:${presentation === 'male' ? '#2c2022' : '#5a2e38'}` : ''}`);
   let spritePosition = $derived(character === 'player' ? (presentation === 'male' ? '0 0' : '-48px 0') : named === 'npc' ? '-96px 0' : '0 0');
   let image = $derived(portraitImages[named]?.[mood] ?? portraitImages[named]?.neutral);

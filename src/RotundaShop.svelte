@@ -22,7 +22,8 @@
   // Store entries emphasize multi-part and study-heavy questions. Question 37 is included
   // so students can prepare for Washington's two-term-limit riddle.
   const storeQuestionIds = [7, 10, 14, 20, 23, 30, 37, 41, 48, 51, 58, 63, 65, 67, 69, 73, 77, 80, 81, 83, 91, 93, 99, 100, 106, 113, 117, 121, 126, 127];
-  let nextQuestionId = $derived(storeQuestionIds.find((id) => !ownedQuestionIds.includes(id)));
+  let availableStoreQuestionIds = $derived(storeQuestionIds.filter((id) => !ownedQuestionIds.includes(id)));
+  let nextQuestionId = $derived(availableStoreQuestionIds.length ? availableStoreQuestionIds[Math.floor(Math.random() * availableStoreQuestionIds.length)] : undefined);
   let nextQuestion = $derived(nextQuestionId ? civicsQuestionById.get(nextQuestionId) : undefined);
 </script>
 
@@ -36,12 +37,10 @@
       <div><h3>Notebook Study Entry</h3><p>{nextQuestion ? `Question ${nextQuestion.id}: ${nextQuestion.prompt}` : 'All 30 Rotunda study entries have been collected.'}</p><span>STORE ENTRIES: {ownedQuestionIds.filter((id) => storeQuestionIds.includes(id)).length} / 30</span></div>
       <button class="primary" disabled={!nextQuestionId || influence < 25} onclick={() => nextQuestionId && onbuyquestion(nextQuestionId)}>25 INF</button>
     </article>
-    {#if !filibusterTriggered}
-      <article class="notebook-purchase super-pac-purchase">
-        <div><h3>Super PAC Injection</h3><p>Buy before the Filibuster. If Senate Overtime begins, it clears five Rogue Senator Nodes.</p><span>IN INVENTORY: {inventory.superPac} / 1</span></div>
-        <button class="primary" disabled={influence < 250 || inventory.superPac >= 1} onclick={() => onbuy('superPac', 250)}>250 INF</button>
-      </article>
-    {/if}
+    <article class="notebook-purchase super-pac-purchase">
+      <div><h3>Super PAC Injection</h3><p>Use one before Committee markup to secure a stronger hearing, or save one for Senate Overtime to clear five Rogue Senator Nodes. You may carry two.</p><span>IN INVENTORY: {inventory.superPac} / 2</span></div>
+      <button class="primary" disabled={influence < 250 || inventory.superPac >= 2} onclick={() => onbuy('superPac', 250)}>250 INF</button>
+    </article>
     <div class="shop-items">
       {#each items as item}
         <article>

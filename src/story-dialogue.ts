@@ -115,6 +115,30 @@ export const touristDialogue = [
   { id: 'lincoln-visitor', place: 'Lincoln Memorial', speaker: 'Ilse, visitor practicing English', text: '“History is easier to remember when I connect a person, a place, and a question. Today I have all three.”' }
 ] as const;
 
+export function touristInteractionId(name: string) {
+  return `tourist-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+}
+
+const dcVisitorFacts = [
+  'Washington was planned as a federal district, rather than becoming part of any one state. That gave the national government a home shared by the whole country.',
+  'Pierre Charles L\'Enfant designed Washington with broad avenues that connect important public buildings and open spaces. The street plan helps visitors see how the city\'s civic places relate to one another.',
+  'The original District of Columbia was a ten-mile square. In 1846, Congress returned the land on the Virginia side of the Potomac River to Virginia.',
+  'Washington has an elected mayor and a 13-member Council that handle many local services, while Congress has special authority over the federal district. That is one example of local and national government sharing a place.',
+  'The National Mall is not simply a lawn between monuments. It is a public landscape where people gather for visits, demonstrations, ceremonies, and civic reflection.',
+  'The Statue of Freedom stands on top of the Capitol dome. It was placed there during the Civil War, when finishing the dome became a symbol that the Union would continue.',
+  'The Library of Congress serves Congress as a research library and also preserves books, maps, recordings, and other materials for the public and future researchers.',
+  'The Supreme Court chooses only a small share of the requests it receives each year. Many legal disputes are resolved by lower courts before they ever reach the highest court.',
+  'The Smithsonian is a group of museums and research centers created by Congress. Its collections help people study evidence from history, science, art, and culture.',
+  'Pennsylvania Avenue links the White House and the Capitol. Inaugural parades have used this route to connect the incoming President with the seat of Congress.',
+  'Washington\'s Metro system began carrying passengers in 1976. Public transportation helps residents, workers, and visitors reach shared civic spaces.',
+  'Memorials often use the actual words of leaders and advocates in their inscriptions. Reading those words in place can turn a history lesson into a question about the ideals people are still working toward.'
+] as const;
+
+export function dcVisitorFact(name: string) {
+  const hash = [...name].reduce((total, character) => total + character.charCodeAt(0), 0);
+  return dcVisitorFacts[hash % dcVisitorFacts.length];
+}
+
 export const landmarkText: Record<string, { title: string; body: string; reflection: string }> = {
   capitol: { title: 'U.S. Capitol', body: 'The U.S. Capitol is where Congress meets. The House of Representatives and the Senate both work here, in separate chambers, to debate and pass laws.', reflection: 'Look for how a bill must gain support in both chambers before it can go to the President.' },
   'white-house': { title: 'The White House', body: 'The White House is the home and workplace of the President. In the game, the final meeting happens here after Congress has passed the fictional Connected Classrooms Act.', reflection: 'The President can sign a bill or veto it. Congress may respond to a veto by seeking an override.' },

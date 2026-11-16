@@ -1,6 +1,5 @@
 <script lang="ts">
-  import Portrait from './Portrait.svelte';
-  import { touristDialogue } from './story-dialogue';
+  import { dcVisitorFact, touristInteractionId } from './story-dialogue';
   const tourists = [
     { id: 'hollinger', name: 'Mr. Pete Hollinger', place: 'Mall Cafe', voice: 'Retired history teacher who overshares monument trivia.', line: '“The trick to history is asking why people remembered something, not just when it happened.”', reward: 5 },
     { id: 'tanaka', name: 'Yuki Tanaka', place: 'Washington Monument', voice: 'Exchange student who asks the player questions back.', line: '“I have been reading about your government. Will you trade one fact you know for one I found?”', reward: 1 },
@@ -52,12 +51,10 @@
     { id: 'gilbert-turtle', name: 'Gilbert Turtle', place: 'National Mall', voice: 'Visitor enjoying a slow walk between monuments.', line: '“There is no rush when you are learning something worthwhile.”', reward: 1 }
   ];
 
-  let { claimed, onclaim, onclose }: { claimed: string[]; onclaim: (id: string, count: number, source: string) => void; onclose: () => void } = $props();
+  let { visitorName, claimed, onclaim, onclose }: { visitorName: string; claimed: string[]; onclaim: (id: string, count: number, source: string) => void; onclose: () => void } = $props();
+  let visitor = $derived(tourists.find((tourist) => tourist.name === visitorName));
+  let interactionId = $derived(touristInteractionId(visitorName));
+  let reward = $derived(visitor?.reward ?? 1);
 </script>
 
-<div class="modal-backdrop"><dialog class="tourist-panel" open aria-labelledby="tourist-title">
-   <button class="close" aria-label="Close tourist encounters" onclick={onclose}>×</button><p class="eyebrow">WASHINGTON, D.C. · OPTIONAL STUDY ENCOUNTERS</p><h2 id="tourist-title">TOURISTS & LOCALS</h2>
-   <p>Each person has a one-time study reward. Five-pack rewards are marked with a gold card.</p>
-   <section aria-label="Visitor reflections"><p>{touristDialogue[0].speaker}: {touristDialogue[0].text}</p></section>
-  <div class="tourist-list">{#each tourists as tourist}<article class:claimed={claimed.includes(tourist.id)}><Portrait character="npc" initials={tourist.name.split(' ').map((word) => word[0]).join('').slice(0, 2)} mood="pleased"/><div><h3>{tourist.name}</h3><span>{tourist.place} · {tourist.voice}</span><p>{tourist.line}</p></div><button disabled={claimed.includes(tourist.id)} onclick={() => onclaim(tourist.id, tourist.reward, tourist.name)}>{claimed.includes(tourist.id) ? 'COLLECTED' : tourist.reward === 5 ? 'CLAIM 5-PACK' : 'CLAIM STUDY CARD'}</button></article>{/each}</div>
-</dialog></div>
+<div class="modal-backdrop"><dialog class="tourist-panel tourist-dialogue" open aria-labelledby="tourist-dialogue-title"><button class="close" aria-label="Close conversation" onclick={onclose}>×</button><p class="eyebrow">WASHINGTON, D.C. · LOCAL KNOWLEDGE</p><h2 id="tourist-dialogue-title">{visitorName}</h2><p>{visitor?.voice ?? 'A visitor taking time to learn from the city around them.'}</p><p class="tourist-fact"><b>D.C. CIVICS FACT:</b> {dcVisitorFact(visitorName)}</p>{#if visitor}<p>{visitor.line}</p>{/if}{#if claimed.includes(interactionId)}<p>This visitor has already shared their study find with you.</p><button class="primary" onclick={onclose}>CONTINUE EXPLORING</button>{:else}<p>I saved a study find for you after our conversation. Keep it in your Notebook for a civics refresher.</p><button class="primary" onclick={() => { onclaim(interactionId, reward, visitorName); onclose(); }}>{reward === 5 ? 'ACCEPT 5 STUDY FINDS' : 'ACCEPT STUDY FIND'}</button>{/if}</dialog></div>

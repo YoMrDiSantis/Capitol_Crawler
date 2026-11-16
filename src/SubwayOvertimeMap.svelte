@@ -1,18 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { clampGridPosition } from './grid';
   let { gridlock, completedNodes, superPacAvailable, onnode, onusesuperpac, onscout, onreturn }: { gridlock: boolean; completedNodes: number[]; superPacAvailable: boolean; onnode: (id: number) => void; onusesuperpac: () => void; onscout: (id: 'augustus-kane' | 'lucia-marchetti') => void; onreturn: () => void } = $props();
-  let x = $state(1100); let y = $state(1320); let dx = 0; let dy = 0; let frame = 0; let viewport: HTMLDivElement;
-  const nodes = Array.from({ length: 10 }, (_, index) => ({ id: index + 1, x: 340 + (index % 5) * 380, y: 340 + Math.floor(index / 5) * 500 }));
-  const scouts = [{ id: 'augustus-kane' as const, x: 420, y: 1280, label: 'KANE STAFFER' }, { id: 'lucia-marchetti' as const, x: 1780, y: 1280, label: 'PRESS INTERN' }];
-  let nearbyNode = $derived(gridlock ? nodes.find((node) => !completedNodes.includes(node.id) && Math.hypot(node.x - x, node.y - y) < 110) : undefined);
-  let nearbyScout = $derived(scouts.find((scout) => Math.hypot(scout.x - x, scout.y - y) < 125));
+  const tileSize = 100;
+  let x = $state(1100); let y = $state(1300); let viewport: HTMLDivElement;
+  const nodes = Array.from({ length: 10 }, (_, index) => ({ id: index + 1, x: 400 + (index % 5) * 350, y: 400 + Math.floor(index / 5) * 500 }));
+  const scouts = [{ id: 'augustus-kane' as const, x: 400, y: 1300, label: 'KANE STAFFER' }, { id: 'lucia-marchetti' as const, x: 1800, y: 1300, label: 'PRESS INTERN' }];
+  let nearbyNode = $derived(gridlock ? nodes.find((node) => !completedNodes.includes(node.id) && Math.hypot(node.x - x, node.y - y) <= tileSize) : undefined);
+  let nearbyScout = $derived(scouts.find((scout) => Math.hypot(scout.x - x, scout.y - y) <= tileSize));
   let nearExit = $derived(y > 1430);
-  function move(){if(dx||dy){x=Math.max(140,Math.min(2060,x+dx*6));y=Math.max(150,Math.min(1540,y+dy*6))}frame=requestAnimationFrame(move)}
+  function nudge(horizontal:number,vertical:number){x=clampGridPosition(x+horizontal*tileSize,100,2100,tileSize);y=clampGridPosition(y+vertical*tileSize,200,1500,tileSize)}
   function interact(){if(nearbyNode)onnode(nearbyNode.id);else if(nearbyScout)onscout(nearbyScout.id);else if(nearExit)onreturn()}
-  onMount(()=>{const down=(e:KeyboardEvent)=>{if((e.target as HTMLElement)?.tagName==='INPUT')return;if(['ArrowLeft','a','A'].includes(e.key)){e.preventDefault();dx=-1;dy=0}if(['ArrowRight','d','D'].includes(e.key)){e.preventDefault();dx=1;dy=0}if(['ArrowUp','w','W'].includes(e.key)){e.preventDefault();dx=0;dy=-1}if(['ArrowDown','s','S'].includes(e.key)){e.preventDefault();dx=0;dy=1}if(['e','E','Enter'].includes(e.key))interact()};const up=()=>{dx=0;dy=0};window.addEventListener('keydown',down);window.addEventListener('keyup',up);frame=requestAnimationFrame(move);return()=>{cancelAnimationFrame(frame);window.removeEventListener('keydown',down);window.removeEventListener('keyup',up)}})
+  onMount(()=>{const down=(e:KeyboardEvent)=>{if((e.target as HTMLElement)?.tagName==='INPUT')return;if(['ArrowLeft','a','A'].includes(e.key)){e.preventDefault();nudge(-1,0)}if(['ArrowRight','d','D'].includes(e.key)){e.preventDefault();nudge(1,0)}if(['ArrowUp','w','W'].includes(e.key)){e.preventDefault();nudge(0,-1)}if(['ArrowDown','s','S'].includes(e.key)){e.preventDefault();nudge(0,1)}if(['e','E','Enter'].includes(e.key))interact()};window.addEventListener('keydown',down);return()=>window.removeEventListener('keydown',down)})
   $effect(()=>{if(viewport)viewport.scrollTo({left:Math.max(0,x-viewport.clientWidth/2),top:Math.max(0,y-viewport.clientHeight/2),behavior:'smooth'})})
 </script>
-<main class="subway-map illustrated-subway"><header><button onclick={onreturn}>← SENATE</button><div><p>{gridlock ? 'SENATE OVERTIME' : 'SENATE CLOAKROOMS'}</p><h1>CLOAKROOM <span>SUBWAY</span></h1></div><b>{gridlock ? `${completedNodes.length} / 10 NODES` : 'SCOUTING OPEN'}</b></header><div class="subway-viewport" bind:this={viewport}><section class="subway-room">
+  <main class="subway-map illustrated-subway"><header><button onclick={onreturn}>← SENATE</button><div><p>{gridlock ? 'SENATE OVERTIME' : 'SENATE CLOAKROOMS'}</p><h1>CLOAKROOM <span>SUBWAY</span></h1></div><b>{gridlock ? `${completedNodes.length} / 10 NODES` : 'SCOUTING OPEN'}</b></header><div class="subway-viewport" bind:this={viewport}><section class="subway-room grid-room" style={`--tile-size:${tileSize}px`}>
   <div class="subway-wall-sign">CAPITOL SUBWAY ACCESS</div><div class="subway-tile-wall" aria-hidden="true"></div><div class="subway-tracks"><i></i><i></i></div><div class="subway-platform platform-top" aria-hidden="true"></div><div class="subway-platform platform-bottom" aria-hidden="true"></div>
   <div class="cloak-lockers lockers-left"></div><div class="cloak-lockers lockers-right"></div><div class="subway-bench bench-left" aria-hidden="true"></div><div class="subway-bench bench-right" aria-hidden="true"></div>
   {#if gridlock}{#each nodes as node}<button class:cleared={completedNodes.includes(node.id)} class="rogue-map-node" style={`left:${node.x}px;top:${node.y}px`} disabled={completedNodes.includes(node.id)} onclick={() => onnode(node.id)}><i></i><b>{completedNodes.includes(node.id) ? '✓' : '?'}</b><span>NODE {node.id}</span></button>{/each}{:else}<div class="subway-scout-note">Rogue Nodes are dormant until a failed Filibuster. Staff contacts are available now.</div>{/if}
