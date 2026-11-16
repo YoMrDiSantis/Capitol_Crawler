@@ -45,15 +45,17 @@
   import PrivacyPage from './PrivacyPage.svelte';
   import { route } from './route.svelte';
   import { civicsQuestionById, civicsStudyNotes, type CivicsCategory } from './civics-questions';
-  import { isSupportedDynamicQuestion } from './jurisdictions';
+  import { isSupportedDynamicQuestion, jurisdictionByCode } from './jurisdictions';
   import { validateSupportedDynamicAnswer } from './civics-validation';
+  import { dynamicAnswerSummary } from './dynamic-answers';
+  import { districtsForZip } from './zip-lookup';
 import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLedger, houseQuestionIds, requiredVotes, senateEncounters, senateQuestionIds, type Encounter, type HouseVoteLedger } from './game';
   import { oppositeTrait, traitPairs, type Trait } from './npc-dialogue';
 
    const rotundaShopQuestionIds = [7, 10, 14, 20, 23, 30, 37, 41, 48, 51, 58, 63, 65, 67, 69, 73, 77, 80, 81, 83, 91, 93, 99, 100, 106, 113, 117, 121, 126, 127];
    type Save = {
     version: 28; playerX: number; playerY: number; votes: number; influence: number; completed: string[]; locked: string[];
-      committeeStatus: string; committeeAmendments: string[]; encounteredQuestionIds: number[]; correctQuestionIds: number[]; notebookQuestionIds: number[]; notebookSources: Record<number, string>; touristClaims: string[]; delNotebookCountAtContact: number | null; committeeQuestionIds: number[]; filibusterQuestionIds: number[]; filibusterIntroSeen?: boolean; overtimeQuestionIds: number[]; ovalOfficeQuestionIds: number[]; attempts: Record<string, number>; rapportScores: Record<string, number>; leaderTraits: Record<string, Trait>; stanceTags: Trait[]; scoutedLeaders: string[]; archiveBriefingRecovered: boolean; priyaBriefcaseRecovered: boolean; abbonizioOfficeClosed?: boolean; houseLedger: HouseVoteLedger; inventory: Inventory; housePassageSeen: boolean; benTutorialComplete: boolean; senateVotes: number; senateCompleted: string[]; senateLocked: string[]; senateAttempts: Record<string, number>; filibusterResolved: boolean; resolvedHolds: string[]; gridlock: boolean; rogueNodes: number[]; bossAttempts: string[]; whiteHouseUnlocked: boolean; presidentAlignment: 'ally' | 'opposition'; billBecameLaw: boolean; scoreLocked: boolean; overrideActive: boolean; jurisdictionCode: string; city: string; minutes: number; completionMinutes: number | null; ovalOfficeAccuracyBonus: number; washingtonGhostComplete: boolean; lincolnGhostComplete: boolean; ghostWhispers: string[]; seenVocabulary: string[]; vocabularyEasterEggSeen: boolean; playerName: string; playerFirstName: string; playerLastName: string; playerPresentation: 'female' | 'male'; playerSkinTone: string; playerParty: 'D' | 'R'; completionRoute: 'signed' | 'override'; duncanFound: boolean;
+      committeeStatus: string; committeeAmendments: string[]; encounteredQuestionIds: number[]; correctQuestionIds: number[]; notebookQuestionIds: number[]; notebookSources: Record<number, string>; touristClaims: string[]; delNotebookCountAtContact: number | null; committeeQuestionIds: number[]; filibusterQuestionIds: number[]; filibusterIntroSeen?: boolean; overtimeQuestionIds: number[]; ovalOfficeQuestionIds: number[]; attempts: Record<string, number>; rapportScores: Record<string, number>; leaderTraits: Record<string, Trait>; stanceTags: Trait[]; scoutedLeaders: string[]; archiveBriefingRecovered: boolean; priyaBriefcaseRecovered: boolean; abbonizioOfficeClosed?: boolean; houseLedger: HouseVoteLedger; inventory: Inventory; housePassageSeen: boolean; benTutorialComplete: boolean; senateVotes: number; senateCompleted: string[]; senateLocked: string[]; senateAttempts: Record<string, number>; filibusterResolved: boolean; resolvedHolds: string[]; gridlock: boolean; rogueNodes: number[]; bossAttempts: string[]; whiteHouseUnlocked: boolean; presidentAlignment: 'ally' | 'opposition'; billBecameLaw: boolean; scoreLocked: boolean; overrideActive: boolean; jurisdictionCode: string; zip?: string; minutes: number; completionMinutes: number | null; ovalOfficeAccuracyBonus: number; washingtonGhostComplete: boolean; lincolnGhostComplete: boolean; ghostWhispers: string[]; seenVocabulary: string[]; vocabularyEasterEggSeen: boolean; playerName: string; playerFirstName: string; playerLastName: string; playerPresentation: 'female' | 'male'; playerSkinTone: string; playerParty: 'D' | 'R'; completionRoute: 'signed' | 'override'; duncanFound: boolean;
   };
    const SAVE_KEY = 'capitol-hill-crawler-save-v28';
   const CERTIFICATE_KEY = 'capitol-hill-crawler-last-completion-v1';
@@ -100,7 +102,10 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   let overrideOpen = $state(false);
   let overrideFinaleOpen = $state(false);
   let jurisdictionCode = $state('');
-  let city = $state('');
+  // Optional. Narrows question 29 from the whole delegation to the student's own district. Resolved
+  // against a table bundled with the app, so it never leaves the device.
+  let zip = $state('');
+  let zipDistricts = $state<number[] | null>(null);
   let profileOpen = $state(false);
   let nightAlternatesOpen = $state(false);
   let activeRapportBonus = $state(0);
@@ -179,18 +184,26 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
 
   let notes = $derived(civicsQuestionIds(notebookQuestionIds).map((id) => {
     const question = civicsQuestionById.get(id)!;
-    return { id, category: question.category as CivicsCategory, title: question.prompt, source: notebookSources[id] ?? 'Study find', text: `Accepted answers: ${question.acceptedAnswers.join('; ')}${civicsStudyNotes[id] ? ` Study note: ${civicsStudyNotes[id]}` : ''}` };
+    // Dynamic questions store USCIS proctor boilerplate as their accepted answer, so the Notebook
+    // shows the resolved current answer instead of "Answers will vary."
+    const answers = dynamicAnswerSummary(question, jurisdictionCode, zipDistricts ?? undefined) ?? question.acceptedAnswers.join('; ');
+    return { id, category: question.category as CivicsCategory, title: question.prompt, source: notebookSources[id] ?? 'Study find', text: `Accepted answers: ${answers}${civicsStudyNotes[id] ? ` Study note: ${civicsStudyNotes[id]}` : ''}` };
   }));
   let progress = $derived(Math.min(100, Math.round(votes / requiredVotes * 100)));
    let activeQuestion = $derived(activeQuestionData ?? (activeQuestionId === null ? null : civicsQuestionById.get(activeQuestionId) ?? null));
+  let activeDynamicAnswer = $derived(activeQuestion ? dynamicAnswerSummary(activeQuestion, jurisdictionCode, zipDistricts ?? undefined) : null);
   let houseEncounters = $derived(applyHouseVoteLedger(houseLedger));
-  function partyAdjustedEncounter(encounter: Encounter) {
+  function partyAdjustedEncounter(encounter: Encounter, question?: import('./civics-questions').CivicsQuestion | null) {
     const party = encounter.polarization < 50 ? 'D' : encounter.polarization > 50 ? 'R' : 'I';
-    const mode = encounterModeFor(encounter.polarization, playerParty);
+    let mode = encounterModeFor(encounter.polarization, playerParty);
+    // A multiple-choice option list is built from the question's stored accepted answer, which for
+    // a dynamic question is USCIS proctor boilerplate rather than a name. Ask these open-response,
+    // which is also how "name your representative" is asked in the real interview.
+    if (question?.dynamic && (mode === 'multiple' || mode === 'matrix')) mode = 'short';
     return { ...encounter, affiliation: `${party}-${encounter.affiliation.split('-')[1]}`, mode };
   }
-  let alignedHouseEncounters = $derived(houseEncounters.map(partyAdjustedEncounter));
-  let alignedSenateEncounters = $derived(senateEncounters.map(partyAdjustedEncounter));
+  let alignedHouseEncounters = $derived(houseEncounters.map((encounter) => partyAdjustedEncounter(encounter)));
+  let alignedSenateEncounters = $derived(senateEncounters.map((encounter) => partyAdjustedEncounter(encounter)));
   let committeeRapport = $derived(
     completed.length
       ? Math.round(completed.reduce((total, id) => total + (rapportScores[id] ?? 50), 0) / completed.length)
@@ -216,13 +229,13 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
    }
 
   function save() {
-    const data: Save = { version: 28, playerX, playerY, votes, influence, completed, locked, committeeStatus, committeeAmendments, encounteredQuestionIds, correctQuestionIds, notebookQuestionIds, notebookSources, touristClaims, delNotebookCountAtContact, committeeQuestionIds, filibusterQuestionIds, filibusterIntroSeen, overtimeQuestionIds, ovalOfficeQuestionIds, attempts, rapportScores, leaderTraits, stanceTags, scoutedLeaders, archiveBriefingRecovered, priyaBriefcaseRecovered, abbonizioOfficeClosed, houseLedger, inventory, housePassageSeen, benTutorialComplete, senateVotes, senateCompleted, senateLocked, senateAttempts, filibusterResolved, resolvedHolds, gridlock, rogueNodes, bossAttempts, whiteHouseUnlocked, presidentAlignment, billBecameLaw, scoreLocked, overrideActive, jurisdictionCode, city, minutes, completionMinutes, ovalOfficeAccuracyBonus, washingtonGhostComplete, lincolnGhostComplete, ghostWhispers, seenVocabulary, vocabularyEasterEggSeen, playerName, playerFirstName, playerLastName, playerPresentation, playerSkinTone, playerParty, completionRoute, duncanFound };
+    const data: Save = { version: 28, playerX, playerY, votes, influence, completed, locked, committeeStatus, committeeAmendments, encounteredQuestionIds, correctQuestionIds, notebookQuestionIds, notebookSources, touristClaims, delNotebookCountAtContact, committeeQuestionIds, filibusterQuestionIds, filibusterIntroSeen, overtimeQuestionIds, ovalOfficeQuestionIds, attempts, rapportScores, leaderTraits, stanceTags, scoutedLeaders, archiveBriefingRecovered, priyaBriefcaseRecovered, abbonizioOfficeClosed, houseLedger, inventory, housePassageSeen, benTutorialComplete, senateVotes, senateCompleted, senateLocked, senateAttempts, filibusterResolved, resolvedHolds, gridlock, rogueNodes, bossAttempts, whiteHouseUnlocked, presidentAlignment, billBecameLaw, scoreLocked, overrideActive, jurisdictionCode, zip, minutes, completionMinutes, ovalOfficeAccuracyBonus, washingtonGhostComplete, lincolnGhostComplete, ghostWhispers, seenVocabulary, vocabularyEasterEggSeen, playerName, playerFirstName, playerLastName, playerPresentation, playerSkinTone, playerParty, completionRoute, duncanFound };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     hasSave = true;
   }
 
   function newGame() {
-    playerX = 3000; playerY = 900; votes = 0; influence = 0; completed = []; locked = []; committeeStatus = 'Not started'; committeeAmendments = []; committeeOpen = false; committeeAmbushOpen = false; committeeAmbushQuestionId = null; committeeEased = false; inventory = { coffee: 0, memo: 0, hearingAid: 0, superPac: 0 }; houseLedger = generateHouseVoteLedger(); housePassageSeen = false; housePassageOpen = false; benTutorialComplete = false; benTutorialOpen = false; senateVotes = 0; senateCompleted = []; senateLocked = []; senateAttempts = {}; filibusterIntroSeen = false; filibusterResolved = false; resolvedHolds = []; gridlock = false; rogueNodes = []; bossAttempts = []; whiteHouseUnlocked = false; presidentAlignment = Math.random() < .5 ? 'ally' : 'opposition'; billBecameLaw = false; scoreLocked = false; overrideActive = false; jurisdictionCode = ''; city = ''; profileOpen = true;
+    playerX = 3000; playerY = 900; votes = 0; influence = 0; completed = []; locked = []; committeeStatus = 'Not started'; committeeAmendments = []; committeeOpen = false; committeeAmbushOpen = false; committeeAmbushQuestionId = null; committeeEased = false; inventory = { coffee: 0, memo: 0, hearingAid: 0, superPac: 0 }; houseLedger = generateHouseVoteLedger(); housePassageSeen = false; housePassageOpen = false; benTutorialComplete = false; benTutorialOpen = false; senateVotes = 0; senateCompleted = []; senateLocked = []; senateAttempts = {}; filibusterIntroSeen = false; filibusterResolved = false; resolvedHolds = []; gridlock = false; rogueNodes = []; bossAttempts = []; whiteHouseUnlocked = false; presidentAlignment = Math.random() < .5 ? 'ally' : 'opposition'; billBecameLaw = false; scoreLocked = false; overrideActive = false; jurisdictionCode = ''; zip = ''; zipDistricts = null; profileOpen = true;
     attempts = {}; rapportScores = {}; leaderTraits = {}; stanceTags = []; scoutedLeaders = []; touristClaims = []; archiveBriefingRecovered = false; priyaBriefcaseRecovered = false; abbonizioOfficeClosed = false; encounteredQuestionIds = []; correctQuestionIds = []; notebookQuestionIds = []; notebookSources = {}; committeeQuestionIds = []; filibusterQuestionIds = []; overtimeQuestionIds = []; ovalOfficeQuestionIds = []; activeQuestionId = null; corinneHoldQuestionId = null; minutes = 8 * 60; completionMinutes = null; ovalOfficeAccuracyBonus = 0; washingtonGhostComplete = false; lincolnGhostComplete = false; ghostWhispers = []; seenVocabulary = []; vocabularyEasterEggSeen = false; playerName = 'Representative'; playerFirstName = ''; playerLastName = ''; playerParty = 'D'; completionRoute = 'signed'; duncanFound = false;
     screen = 'rotunda'; showBrief = false; characterCreationOpen = true; save();
   }
@@ -231,9 +244,13 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     try {
       const data = JSON.parse(localStorage.getItem(SAVE_KEY) ?? '') as Save;
       if (data.version !== 28) return newGame();
-      ({ playerX, playerY, votes, influence, completed, locked, committeeStatus, committeeAmendments, encounteredQuestionIds, correctQuestionIds, notebookQuestionIds, notebookSources, touristClaims, delNotebookCountAtContact, committeeQuestionIds, filibusterQuestionIds, overtimeQuestionIds, ovalOfficeQuestionIds, attempts, rapportScores, leaderTraits, stanceTags, scoutedLeaders, archiveBriefingRecovered, priyaBriefcaseRecovered, houseLedger, inventory, housePassageSeen, benTutorialComplete, senateVotes, senateCompleted, senateLocked, senateAttempts, filibusterResolved, resolvedHolds, gridlock, rogueNodes, bossAttempts, whiteHouseUnlocked, presidentAlignment, billBecameLaw, scoreLocked, overrideActive, jurisdictionCode, city, minutes, completionMinutes, ovalOfficeAccuracyBonus, washingtonGhostComplete, lincolnGhostComplete, ghostWhispers, seenVocabulary, vocabularyEasterEggSeen, playerName, playerFirstName, playerLastName, playerPresentation, playerSkinTone, playerParty, completionRoute, duncanFound } = data);
+      ({ playerX, playerY, votes, influence, completed, locked, committeeStatus, committeeAmendments, encounteredQuestionIds, correctQuestionIds, notebookQuestionIds, notebookSources, touristClaims, delNotebookCountAtContact, committeeQuestionIds, filibusterQuestionIds, overtimeQuestionIds, ovalOfficeQuestionIds, attempts, rapportScores, leaderTraits, stanceTags, scoutedLeaders, archiveBriefingRecovered, priyaBriefcaseRecovered, houseLedger, inventory, housePassageSeen, benTutorialComplete, senateVotes, senateCompleted, senateLocked, senateAttempts, filibusterResolved, resolvedHolds, gridlock, rogueNodes, bossAttempts, whiteHouseUnlocked, presidentAlignment, billBecameLaw, scoreLocked, overrideActive, jurisdictionCode, minutes, completionMinutes, ovalOfficeAccuracyBonus, washingtonGhostComplete, lincolnGhostComplete, ghostWhispers, seenVocabulary, vocabularyEasterEggSeen, playerName, playerFirstName, playerLastName, playerPresentation, playerSkinTone, playerParty, completionRoute, duncanFound } = data);
       abbonizioOfficeClosed = data.abbonizioOfficeClosed ?? false;
       filibusterIntroSeen = data.filibusterIntroSeen ?? false;
+      // Added after v28 shipped, so it is read defensively rather than bumping the save version
+      // and wiping every campaign in progress.
+      zip = data.zip ?? '';
+      void refreshZipDistricts();
       committeeOpen = false;
       committeeAmbushOpen = committeeStatus === 'Markup interrupted' && committeeQuestionIds[0] !== undefined;
       committeeAmbushQuestionId = committeeAmbushOpen ? committeeQuestionIds[0] : null;
@@ -260,6 +277,15 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     return Boolean(question && (!question.dynamic || isSupportedDynamicQuestion(id, jurisdictionCode)));
   }
 
+  /**
+   * Committee and the Oval Office ask multiple-choice questions and grade without the dynamic
+   * resolver, so a current-officeholder question cannot be answered correctly there. Those
+   * questions are asked on the House floor, which is open-response and has the resolver.
+   */
+  function isEligibleFixedAnswerQuestion(id: number) {
+    return isEligibleLiveQuestion(id) && !civicsQuestionById.get(id)?.dynamic;
+  }
+
   function reserveQuestions(pool: number[], count: number) {
     const available = pool.filter((id) => !encounteredQuestionIds.includes(id) && isEligibleLiveQuestion(id));
     const reserved = shuffleQuestions(available).slice(0, count);
@@ -282,7 +308,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     if (activeLevel === 'senate' && isHoldLeader(encounter.id) && !resolvedHolds.includes(encounter.id)) {
       if (encounter.id === 'corinne-vasquez' && corinneHoldQuestionId === null) {
         corinneHoldQuestionId = shuffleQuestions(senateQuestionIds(true)
-          .filter((id) => !encounteredQuestionIds.includes(id) && isEligibleLiveQuestion(id)))[0] ?? 73;
+          .filter((id) => !encounteredQuestionIds.includes(id) && isEligibleFixedAnswerQuestion(id)))[0] ?? 73;
       }
       activeHoldId = encounter.id;
       return;
@@ -292,12 +318,11 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
       announcement = 'No eligible question remains in this test save. Start a new campaign to refresh the study pool.';
       return;
     }
-    if (questionId === 29) { active = encounter; activeQuestionId = questionId; activeQuestionData = civicsQuestionById.get(questionId) ?? null; representativeLookupOpen = true; return; }
     encounteredQuestionIds = [...encounteredQuestionIds, questionId];
     ensureLeaderTrait(encounter.id);
     activeQuestionId = questionId;
     activeQuestionData = civicsQuestionById.get(questionId) ?? null;
-    active = partyAdjustedEncounter(encounter);
+    active = partyAdjustedEncounter(encounter, activeQuestionData);
   }
   function startHouseEncounter(encounter: Encounter) {
     // Keep the House path independent from Senate Holds, Overtime, and any stale
@@ -325,7 +350,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     ensureLeaderTrait(encounter.id);
     activeQuestionId = selectedQuestionId;
     activeQuestionData = civicsQuestionById.get(selectedQuestionId) ?? null;
-    active = partyAdjustedEncounter(encounter);
+    active = partyAdjustedEncounter(encounter, activeQuestionData);
     houseContactOpen = false;
     announcement = `Opening ${encounter.name}'s encounter with Question ${selectedQuestionId}.`;
   }
@@ -389,7 +414,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
           committeeStatus = 'Markup interrupted';
           // One question is used by Ada's floor interruption; seven distinct
           // questions remain for the self-contained Committee sequence.
-          committeeQuestionIds = reserveQuestions(houseQuestionIds(completed.length + 1), 8);
+          committeeQuestionIds = reserveQuestions(houseQuestionIds(completed.length + 1).filter(isEligibleFixedAnswerQuestion), 8);
           committeeAmbushQuestionId = committeeQuestionIds[0] ?? null;
           committeeAmbushOpen = true;
           announcement = 'An extreme House member stops you as your bill is pulled toward Committee markup.';
@@ -637,10 +662,10 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     // The Oval Office is a separate final assessment. It draws from the full curriculum
     // without consuming or being limited by the campaign's no-duplicate encounter pool.
     ovalOfficeQuestionIds = shuffleQuestions([...civicsQuestionById.keys()]
-      .filter((id) => !encounteredQuestionIds.includes(id) && isEligibleLiveQuestion(id)))
+      .filter((id) => !encounteredQuestionIds.includes(id) && isEligibleFixedAnswerQuestion(id)))
       .slice(0, presidentAlignment === 'ally' ? 20 : 10);
     if (ovalOfficeQuestionIds.length < (presidentAlignment === 'ally' ? 20 : 10)) {
-      ovalOfficeQuestionIds = shuffleQuestions([...civicsQuestionById.keys()].filter(isEligibleLiveQuestion))
+      ovalOfficeQuestionIds = shuffleQuestions([...civicsQuestionById.keys()].filter(isEligibleFixedAnswerQuestion))
         .slice(0, presidentAlignment === 'ally' ? 20 : 10);
     }
     ovalOfficeOpen = true;
@@ -702,8 +727,28 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   }
 
   function finishOverride() { overrideFinaleOpen = false; billBecameLaw = true; overrideActive = false; completionRoute = 'override'; completionMinutes = completionMinutes ?? minutes; ovalOfficeAccuracyBonus = 0; celebrationOpen = true; announcement = 'Congress overrode the veto. The bill is now law.'; save(); }
-  function saveProfile(code: string, selectedCity: string) { jurisdictionCode = code; city = selectedCity; profileOpen = false; save(); }
-  function resolveDynamicAnswer(question: import('./civics-questions').CivicsQuestion, answer: string) { return validateSupportedDynamicAnswer(question, answer, jurisdictionCode); }
+  async function saveProfile(code: string, selectedZip: string) {
+    jurisdictionCode = code;
+    zip = selectedZip;
+    profileOpen = false;
+    save();
+    await refreshZipDistricts();
+  }
+
+  // Resolved once whenever the ZIP or jurisdiction changes, so the async table load never sits in
+  // the synchronous path that grades an answer.
+  async function refreshZipDistricts() {
+    zipDistricts = zip ? await districtsForZip(zip, jurisdictionCode) : null;
+  }
+
+  function resolveDynamicAnswer(question: import('./civics-questions').CivicsQuestion, answer: string) {
+    return validateSupportedDynamicAnswer(question, answer, jurisdictionCode, zipDistricts ?? undefined);
+  }
+  async function saveZip(selectedZip: string) {
+    zip = selectedZip;
+    save();
+    await refreshZipDistricts();
+  }
   function openProfile() { profileOpen = true; }
   function finishCharacterCreation(profile: { firstName: string; lastName: string; presentation: 'female' | 'male'; skinTone: string; party: 'D' | 'R' }) {
     playerFirstName = profile.firstName;
@@ -850,7 +895,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     </div>
   {/if}
 
-  {#if active && activeQuestion}<EncounterPanel encounter={active} question={activeQuestion} attempt={((activeLevel === 'senate' ? senateAttempts : attempts)[active.id] ?? 0) + 1} {inventory} playerName={playerName} rapport={Math.min(100, (rapportScores[active.id] ?? 50) + activeRapportBonus)} activeTrait={activeTraitFor(active.id)} alternativeTrait={alternativeTraitFor(active.id)} hasRapport={hasRapportPhase(active)} isExtreme={['augustus-kane', 'lucia-marchetti'].includes(active.id)} onrapport={updateRapport} rapportBonus={activeRapportBonus} {resolveDynamicAnswer} onskipdynamic={() => { if (activeQuestionId === 29) representativeLookupOpen = true; }} onuseitem={usePowerUp} oncomplete={resolveEncounter} onclose={() => { active = null; activeQuestionId = null; activeQuestionData = null; activeRapportBonus = 0; requestAnimationFrame(() => (document.activeElement as HTMLElement | null)?.blur()); }} />{/if}
+  {#if active && activeQuestion}{#key activeQuestionId}<EncounterPanel encounter={active} question={activeQuestion} dynamicAnswer={activeDynamicAnswer} paused={representativeLookupOpen} attempt={((activeLevel === 'senate' ? senateAttempts : attempts)[active.id] ?? 0) + 1} {inventory} playerName={playerName} rapport={Math.min(100, (rapportScores[active.id] ?? 50) + activeRapportBonus)} activeTrait={activeTraitFor(active.id)} alternativeTrait={alternativeTraitFor(active.id)} hasRapport={hasRapportPhase(active)} isExtreme={['augustus-kane', 'lucia-marchetti'].includes(active.id)} onrapport={updateRapport} rapportBonus={activeRapportBonus} {resolveDynamicAnswer} onskipdynamic={() => { if (activeQuestionId === 29) representativeLookupOpen = true; }} onuseitem={usePowerUp} oncomplete={resolveEncounter} onclose={() => { active = null; activeQuestionId = null; activeQuestionData = null; activeRapportBonus = 0; requestAnimationFrame(() => (document.activeElement as HTMLElement | null)?.blur()); }} />{/key}{/if}
    {#if studyNotice}<aside class="study-toast"><button class="dismiss" aria-label="Dismiss study card" onclick={() => studyNotice = null}>×</button><p>NOTEBOOK STUDY FIND</p><strong>{studyNotice.question}</strong><span>{studyNotice.questionIds && studyNotice.questionIds.length > 1 ? `${studyNotice.questionIds.length} new questions are ready to review.` : 'Open your Notebook to review this question.'}</span><button class="open-notebook" onclick={() => { focusedNotebookEntryIds = studyNotice!.questionIds ?? [studyNotice!.questionId]; studyNotice = null; notebookTab = 'entries'; notebookOpen = true; }}>VIEW STUDY FIND</button><small>Review for {studyNotice.stepsRemaining} more steps</small></aside>{/if}
   {#if scoutTrainingOpen}<ScoutTraining leaderName="Rep. Priya Anand" oncomplete={() => { scoutTrainingSeen = true; scoutTargetId = 'priya-anand'; scoutTrainingOpen = false; announcement = 'Your scout has prepared you for Rep. Anand. Find more scouts around the Capitol for optional help.'; save(); }} />{/if}
    {#if committeeAmbushOpen && committeeAmbushQuestionId !== null}<CommitteeAmbush question={civicsQuestionById.get(committeeAmbushQuestionId)!} superPacAvailable={inventory.superPac > 0} onusesuperpac={() => { inventory = { ...inventory, superPac: inventory.superPac - 1 }; announcement = 'Super PAC support secured a stronger Committee hearing.'; save(); }} oncomplete={finishCommitteeAmbush} />{/if}
@@ -867,10 +912,10 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   {#if celebrationOpen}<BillCelebration playerScore={finalScore} notebookEntries={notes.length} correctAnswerPoints={correctAnswerPoints} {notebookEntryPoints} ovalBonus={ovalOfficeAccuracyBonus} {speedBonus} infBonus={Math.min(3200, influence * 3)} onlock={lockScore} onexplore={continueExploring} />{/if}
   {#if overrideOpen}<VetoOverride houseVotes={votes} {senateVotes} onreturn={returnToCongress} />{/if}
   {#if overrideFinaleOpen}<OverrideFinale oncomplete={finishOverride} />{/if}
-  {#if profileOpen}<StudentProfile initialCode={jurisdictionCode} initialCity={city} oncomplete={saveProfile} />{/if}
+  {#if profileOpen}<StudentProfile initialCode={jurisdictionCode} initialZip={zip} oncomplete={saveProfile} />{/if}
   {#if certificateOpen && lastCompletion}<CompletionCertificate playerName={lastCompletion.playerName} route={lastCompletion.route} houseVotes={lastCompletion.houseVotes} senateVotes={lastCompletion.senateVotes} notebookEntries={lastCompletion.notebookEntries} influence={lastCompletion.influence} score={lastCompletion.score} oncontinue={() => { certificateOpen = false; screen = 'title'; }} />{/if}
   {#if characterCreationOpen}<CharacterCreation oncomplete={finishCharacterCreation} />{/if}
-  {#if representativeLookupOpen}<RepresentativeLookup onskip={skipRepresentativeQuestion} onlookup={() => skipRepresentativeQuestion()} />{/if}
+  {#if representativeLookupOpen}<RepresentativeLookup jurisdictionName={jurisdictionByCode(jurisdictionCode)?.name ?? 'your state'} initialZip={zip} districtCount={zipDistricts?.length ?? 0} onskip={skipRepresentativeQuestion} onsave={saveZip} onclose={() => representativeLookupOpen = false} />{/if}
   {#if assetCreditsOpen}<AssetCredits onclose={() => assetCreditsOpen = false} />{/if}
   {#if houseContactOpen}<div class="modal-backdrop"><dialog class="leader-contact-panel" open aria-labelledby="leader-contact-title"><button class="close" aria-label="Close leader directory" onclick={() => houseContactOpen = false}>×</button><p class="eyebrow">HOUSE CONTACT LIST</p><h2 id="leader-contact-title">AVAILABLE LEADERS</h2><p>Select a leader to begin an encounter directly. This is a reliable alternative while the map interaction layer is being refined.</p><div class="leader-contact-list">{#each houseEncounters.filter((encounter) => !completed.includes(encounter.id) && !locked.includes(encounter.id)) as encounter}<button onclick={() => startHouseEncounter(encounter)}><b>{encounter.name}</b><span>{encounter.affiliation} · {encounter.votes} votes</span></button>{/each}</div></dialog></div>{/if}
    {#if mapRoom}{@const roomScoutTargets = { 'west-caucus': ['priya-anand', 'diane-okafor'], 'east-caucus': ['selena-marsh', 'robin-yates'], 'west-cloakroom': ['hank-delgado', 'gus-whitfield'], 'east-cloakroom': ['naomi-cho', 'cyrus-boone'] } as const}{@const targetIds = roomScoutTargets[mapRoom.roomId]}<MapRoom {...mapRoom} discovered={Object.values(notebookSources).includes(mapRoom.source)} scoutAvailable={targetIds.every((id) => houseScoutTargets.includes(id))} scoutTargets={targetIds} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} playerParty={playerParty} ondiscover={discoverNotebookEntry} onnotebook={() => { notebookTab = 'entries'; notebookOpen = true; }} onscout={() => { const newTargets = targetIds.filter((id) => !houseScoutTargets.includes(id)); if (newTargets.length) { houseScoutTargets = [...houseScoutTargets, ...newTargets]; announcement = `Scout intel logged for ${newTargets.map((id) => houseEncounters.find((encounter) => encounter.id === id)?.name).join(' and ')}. Use the aide’s advice in their Rapport conversations.`; save(); } }} onreturn={() => returnFromHouseRoom(mapRoom!.roomId)} />{/if}

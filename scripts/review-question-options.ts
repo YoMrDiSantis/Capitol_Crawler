@@ -1,4 +1,6 @@
 import { writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { civicsQuestions } from '../src/civics-questions';
 import { isCorrectCivicsAnswer } from '../src/civics-validation';
 import { displayChoice, questionChoices } from '../src/game';
@@ -41,7 +43,8 @@ const report = {
   questions: reviews
 };
 
-writeFileSync('/tmp/opencode/civics-question-review.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(`Wrote ${report.totalQuestions}-question review to /tmp/opencode/civics-question-review.json`);
+const reportPath = join(tmpdir(), 'civics-question-review.json');
+writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+console.log(`Wrote ${report.totalQuestions}-question review to ${reportPath}`);
 console.log(`Static-question issues: ${report.issues.length}`);
 for (const issue of report.issues) console.log(`Q${issue.id}: ${issue.options.length} options, ${issue.validOptionCount} valid, duplicates: ${issue.duplicateDisplayedOptions.join(', ') || 'none'}`);

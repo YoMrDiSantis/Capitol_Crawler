@@ -9,7 +9,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "review:questions": "bun scripts/review-question-options.ts",
     "extract:civics": "node scripts/extract-civics-questions.mjs",
-    "update:officeholders": "node scripts/update-officeholders.mjs"
+    "update:officeholders": "node scripts/update-officeholders.mjs",
+    "update:representatives": "node scripts/update-representatives.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "latest",
