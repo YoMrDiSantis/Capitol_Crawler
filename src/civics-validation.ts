@@ -90,6 +90,11 @@ function acceptedVariants(acceptedAnswer: string) {
   const withoutParentheses = normalizeCivicsAnswer(acceptedAnswer.replace(/\([^)]*\)/g, ' '));
   if (withoutParentheses) variants.add(withoutParentheses);
 
+  // Choice labels display "Six years" rather than the source notation
+  // "Six (6) years." Both forms express the same USCIS answer.
+  const numberWithUnit = normalized.match(/^([a-z-]+) \d+ (years?|members?|amendments?|seats?)$/);
+  if (numberWithUnit) variants.add(`${numberWithUnit[1]} ${numberWithUnit[2]}`);
+
   // USCIS uses both “in their district” and “of their district” across equivalent
   // representative-answer phrasing. Accept either classroom-natural preposition.
   if (withoutParentheses.includes(' in their ')) variants.add(withoutParentheses.replace(' in their ', ' of their '));
@@ -183,6 +188,7 @@ export function isCorrectCivicsAnswer(
     });
   });
 }
+
 
 export function validateStableJurisdictionAnswer(question: CivicsQuestion, submittedAnswer: string, jurisdictionCode: string) {
   const jurisdiction = jurisdictionByCode(jurisdictionCode);

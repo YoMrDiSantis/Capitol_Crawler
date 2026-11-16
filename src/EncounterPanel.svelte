@@ -46,7 +46,7 @@
     onclose: () => void;
   } = $props();
 
-  let stage = $state<'greeting' | 'rapport' | 'question' | 'feedback'>('greeting');
+  let stage = $state<'greeting' | 'background' | 'rapport' | 'question' | 'feedback'>('greeting');
   let answer = $state('');
   let correct = $state(false);
   let removedChoice = $state<string | null>(null);
@@ -56,6 +56,13 @@
   let timer: ReturnType<typeof setInterval> | undefined;
   let coffeeTimer: ReturnType<typeof setTimeout> | undefined;
   let dialogue = $derived(dialogueFor(encounter.id));
+  let firstPersonBackground = $derived(
+    dialogue.background
+      .replace(new RegExp(`^${encounter.name.split(' ')[0]}\\b`), 'I')
+      .replace(/^I ([a-z]+)ed\b/, 'I $1')
+      .replace(/^I ([a-z]+)nt\b/, 'I $1')
+      .replace(/^I was\b/, 'I am')
+  );
   let rapportResult = $state('');
 
   function stopTimer() {
@@ -63,10 +70,13 @@
     timer = undefined;
   }
 
-  let rapportTier = $derived(rapport >= 67 ? 'friendly' : rapport <= 33 ? 'hostile' : 'neutral');
+  // A single opening choice moves standard Rapport from 50 to either 65 or 35.
+  // Those results must immediately affect this encounter rather than only a future visit.
   let encounterRapport = $state(50);
   $effect(() => { encounterRapport = rapport; });
-  let choiceCount = $derived(encounter.mode === 'matrix' ? 12 : encounter.mode === 'multiple' ? (Math.abs(50 - encounter.polarization) <= 5 ? 3 : 4) : 0);
+  let rapportTier = $derived(encounterRapport >= 65 ? 'friendly' : encounterRapport <= 35 ? 'hostile' : 'neutral');
+  let baseChoiceCount = $derived(encounter.mode === 'matrix' ? 12 : encounter.mode === 'multiple' ? (Math.abs(50 - encounter.polarization) <= 5 ? 3 : 4) : 0);
+  let choiceCount = $derived(baseChoiceCount);
   let displayedPrompt = $derived(encounter.mode === 'mumbled'
     ? question.prompt.split(/(\s+)/).map((part, index) => index % (rapportTier === 'friendly' ? 5 : 3) === 0 && part.trim().length > 3 ? '...' : part).join('')
     : question.prompt);
@@ -124,22 +134,21 @@
 
 <div class="modal-backdrop" role="presentation">
   <dialog class="dialog-panel" open aria-labelledby="speaker">
-    <header class:has-boss={isExtreme || encounter.id === 'wren-castellano'} class="speaker">
-        {#if encounter.id === 'wren-castellano'}<Portrait character="wren" name="Rep. Wren Castellano" initials="WC" mood={stage === 'feedback' && correct ? 'pleased' : stage === 'greeting' ? 'thoughtful' : 'neutral'} />{:else if isExtreme}<div class="boss-initials" aria-hidden="true">{encounter.portrait}</div>{/if}
+    <header class="speaker">
+        <Portrait character="npc" name={encounter.name} initials={encounter.portrait} mood={stage === 'feedback' && correct ? 'pleased' : stage === 'greeting' ? 'thoughtful' : 'neutral'} />
       <div>
-        <p>{encounter.affiliation} · POLARIZATION {encounter.polarization}</p>
+        <p>{encounter.affiliation}</p>
         <h2 id="speaker">REP. {encounter.name.toUpperCase()}</h2>
-        <span>{encounter.title} · {encounter.votes} votes at stake{rapportBonus ? ` · +${rapportBonus} Rapport` : ''}</span>
+        <span>{encounter.votes} votes at stake{rapportBonus ? ` · +${rapportBonus} Rapport` : ''}</span>
       </div>
       <button class="close" aria-label="Leave conversation" onclick={() => { (document.activeElement as HTMLElement | null)?.blur(); onclose(); }}>×</button>
     </header>
 
     {#if stage === 'greeting'}
-      <div class="dialog-copy">
-        <span class="quote">“</span>
+      <div class="dialog-copy conversation-copy">
         <div>
-          <p>{rapportBonus ? `It is a more relaxed setting tonight. Representative ${playerName}, ${encounter.greeting}` : `Representative ${playerName}, ${encounter.greeting}`}</p>
-          <p class="character-background">{dialogue.background}</p>
+          <p class="speaker-line"><b>{encounter.name}:</b> {rapportBonus ? `Representative ${playerName}, ${encounter.greeting}` : `Representative ${playerName}, ${encounter.greeting}`}</p>
+          <p class="player-line"><b>YOU:</b> I am here to build support for the Connected Schools Act.</p>
           {#if !isExtreme}
             <p class="trait-tell">{traitCopy[activeTrait]?.tell ?? 'They are listening carefully for the kind of case you make.'}</p>
           {:else}
@@ -147,20 +156,27 @@
           {/if}
         </div>
       </div>
-       <button class="primary" onclick={() => { if (hasRapport) stage = 'rapport'; else { stage = 'question'; startTimer(); } }}>MAKE YOUR CASE <span>→</span></button>
+       <div class="dialog-actions"><button class="primary" onclick={() => stage = 'background'}>TELL ME ABOUT YOURSELF →</button><button class="text-button" onclick={() => { if (hasRapport) stage = 'rapport'; else { stage = 'question'; startTimer(); } }}>SKIP TO THE BILL</button></div>
+    {:else if stage === 'background'}
+      <div class="dialog-copy conversation-copy">
+        <div>
+          <p class="speaker-line"><b>{encounter.name}:</b> {firstPersonBackground}</p>
+          <p class="player-line"><b>YOU:</b> Thanks for sharing that. I am ready to talk about the bill.</p>
+        </div>
+      </div>
+      <button class="primary" onclick={() => { if (hasRapport) stage = 'rapport'; else { stage = 'question'; startTimer(); } }}>MAKE YOUR CASE →</button>
     {:else if stage === 'rapport'}
-       <div class="dialog-copy rapport-copy"><span class="quote">“</span><div><p>{dialogue.prompt}</p><div class="rapport-options"><button onclick={() => { const result = onrapport(activeTrait); encounterRapport = result.rapport; rapportResult = result.message; stage = 'question'; startTimer(); }}>{traitCopy[activeTrait].response}</button><button onclick={() => { const result = onrapport(alternativeTrait); encounterRapport = result.rapport; rapportResult = result.message; stage = 'question'; startTimer(); }}>{traitCopy[alternativeTrait].response}</button><button onclick={() => { const result = onrapport('neutral'); encounterRapport = result.rapport; rapportResult = result.message; stage = 'question'; startTimer(); }}>{dialogue.neutral}</button></div><p class="rapport-status">Current Rapport: {rapport} / 100</p></div></div>
+        <div class="dialog-copy rapport-copy"><span class="quote">“</span><div><p>{dialogue.prompt}</p><div class="rapport-options"><button onclick={() => { const result = onrapport(activeTrait); encounterRapport = result.rapport; rapportResult = result.message; stage = 'question'; startTimer(); }}>{traitCopy[activeTrait].response}</button><button onclick={() => { const result = onrapport(alternativeTrait); encounterRapport = result.rapport; rapportResult = result.message; stage = 'question'; startTimer(); }}>{traitCopy[alternativeTrait].response}</button><button onclick={() => { const result = onrapport('neutral'); encounterRapport = result.rapport; rapportResult = result.message; stage = 'question'; startTimer(); }}>{dialogue.neutral}</button></div><p class="rapport-status">Current Rapport: {encounterRapport} / 100</p></div></div>
     {:else if stage === 'question'}
-      <div class="question-heading">
-        <span>USCIS CIVICS · QUESTION {question.id} · ATTEMPT {attempt}</span>
-       <strong>{encounter.mode === 'matrix' ? '12-CHOICE' : encounter.mode === 'multiple' ? `${choiceCount}-CHOICE` : encounter.mode === 'mumbled' ? 'MUMBLED RESPONSE' : 'OPEN RESPONSE'} · {coffeePaused ? 'COFFEE BREAK' : `${secondsRemaining}s`}</strong>
+        <div class="question-heading">
+          <span>USCIS CIVICS · QUESTION {question.id} · ATTEMPT {attempt}</span>
+        <strong>{encounter.mode === 'matrix' || encounter.mode === 'multiple' ? `${choiceCount}-CHOICE` : encounter.mode === 'mumbled' ? 'MUMBLED RESPONSE' : 'OPEN RESPONSE'} · {coffeePaused ? 'COFFEE BREAK' : `${secondsRemaining}s`}</strong>
       </div>
        <h3 class:mumbled-prompt={encounter.mode === 'mumbled'}>{displayedPrompt}</h3>
        {#if rapportResult}<p class="rapport-result">{rapportResult}</p>{/if}
        {#if isCurrentOfficeholderQuestion}<p class="hint"><strong>Current-official answer tip:</strong> A last name is usually enough. Include a first name only if more than one relevant official shares that last name. Last verified: {officeholderDataLastVerified}.</p>{/if}
       {#if question.id === 29}<button class="item-use" onclick={onskipdynamic}>FIND OR SKIP YOUR REPRESENTATIVE QUESTION</button>{/if}
-       {#if (encounter.mode === 'short' && rapportTier !== 'hostile') || (encounter.mode === 'mumbled' && rapportTier === 'friendly')}<p class="hint">{encounter.hint ?? 'Context hint: identify the constitutional or civic principle at the heart of the question.'}</p>{/if}
-       {#if encounter.mode === 'short' && rapportTier === 'friendly'}<p class="hint">Friendly Rapport: you have extra time for this answer.</p>{/if}
+        {#if rapportTier === 'friendly'}<p class="hint">Friendly Rapport: {encounter.hint ?? 'Look for the constitutional or civic principle at the heart of the question.'}{#if encounter.mode === 'short' || encounter.mode === 'mumbled'} You also have extra time.{/if}</p>{:else if encounter.mode === 'short' && rapportTier !== 'hostile'}<p class="hint">{encounter.hint ?? 'Context hint: identify the constitutional or civic principle at the heart of the question.'}</p>{:else if rapportTier === 'hostile'}<p class="hint">Hostile Rapport: this colleague is keeping the conversation brief. A precise answer can still win their support.</p>{/if}
       {#if hearingAidUsed}<p class="hint">Hearing Aid active: the question text is as clear as possible.</p>{/if}
        {#if inventory.memo > 0 && choiceCount > 0}<button class="item-use" onclick={() => useItem('memo')}>USE TALKING POINTS MEMO · {inventory.memo}</button>{/if}
        {#if inventory.hearingAid > 0 && encounter.mode === 'mumbled'}<button class="item-use" onclick={() => useItem('hearingAid')}>USE HEARING AID · {inventory.hearingAid}</button>{/if}

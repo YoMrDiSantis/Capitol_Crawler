@@ -2,29 +2,36 @@
   import { onMount } from 'svelte';
   import Portrait from './Portrait.svelte';
   import { ovalOfficeDialogue } from './story-dialogue';
+  import { clampGridPosition } from './grid';
 
-   type Room = 'press' | 'prep' | 'oval' | 'lincoln' | 'office-a' | 'office-b' | null;
+  type Room = 'press' | 'prep' | 'oval' | 'lincoln' | 'office-a' | 'office-b';
+  type WestWingStop = { id: Room; x: number; y: number; label: string };
   let { overrideReady, lincolnReady, onshop, onbill, onnotebook, onreturn, onovaloffice, onlincoln }: {
     overrideReady: boolean;
     lincolnReady: boolean;
     onshop: () => void; onbill: () => void; onnotebook: () => void; onreturn: () => void; onovaloffice: () => void; onlincoln: () => void;
   } = $props();
 
+  const tileSize = 50;
+  const mapWidth = 1000;
+  const mapHeight = 820;
+  let stops = $derived<WestWingStop[]>([
+    { id: 'oval', x: 500, y: 150, label: 'OVAL OFFICE ENTRANCE' },
+    { id: 'press', x: 250, y: 350, label: 'PRESS ROOM' },
+    { id: 'prep', x: 750, y: 350, label: 'PREPARATION ROOM' },
+    { id: 'office-a', x: 100, y: 600, label: 'LEGISLATIVE AFFAIRS' },
+    { id: 'office-b', x: 900, y: 600, label: 'WEST WING OPERATIONS' },
+    ...(lincolnReady ? [{ id: 'lincoln' as Room, x: 500, y: 550, label: 'ONE FINAL STOP' }] : [])
+  ]);
   let x = $state(500);
-  let y = $state(690);
-  let nearby = $derived<Room>(
-     Math.hypot(x - 245, y - 360) < 85 ? 'press'
-      : Math.hypot(x - 755, y - 360) < 85 ? 'prep'
-        : Math.hypot(x - 125, y - 610) < 78 ? 'office-a'
-          : Math.hypot(x - 875, y - 610) < 78 ? 'office-b'
-        : Math.hypot(x - 500, y - 135) < 100 ? 'oval'
-          : lincolnReady && Math.hypot(x - 500, y - 520) < 80 ? 'lincoln' : null
-  );
-  let roomOpen = $state<Room>(null);
+  let y = $state(700);
+  let nearbyStop = $derived(stops.find((stop) => Math.max(Math.abs(stop.x - x), Math.abs(stop.y - y)) <= tileSize));
+  let nearby = $derived<Room | null>(nearbyStop?.id ?? null);
+  let roomOpen = $state<Room | null>(null);
 
   function nudge(horizontal: number, vertical: number) {
-    x = Math.max(75, Math.min(925, x + horizontal * 38));
-    y = Math.max(85, Math.min(760, y + vertical * 38));
+    x = clampGridPosition(x + horizontal * tileSize, tileSize, mapWidth - tileSize, tileSize);
+    y = clampGridPosition(y + vertical * tileSize, tileSize, mapHeight - tileSize, tileSize);
   }
   function interact() { if (nearby) roomOpen = nearby; }
 
@@ -44,18 +51,18 @@
 
 <main class="white-house illustrated-white-house">
   <header class="white-house-header"><button onclick={onreturn}>← D.C.</button><div><p>WHITE HOUSE · WEST WING</p><h1>THE <span>WHITE HOUSE</span></h1></div><span>FINAL PREPARATION</span></header>
-   <section class="white-house-map">
-    <div class="west-wing-camera" style={`transform:translate(${Math.max(-260, Math.min(0, 500 - x))}px,${Math.max(-190, Math.min(0, 360 - y))}px)`}>
-      <div class="west-wing-carpet"></div><div class="west-wing-gallery"></div><div class="west-wing-windows"></div><div class="west-wing-wall west"></div><div class="west-wing-wall east"></div><div class="west-wing-portrait portrait-washington">WASHINGTON</div><div class="west-wing-portrait portrait-lincoln">LINCOLN</div><div class="west-wing-flag flag-west"></div><div class="west-wing-flag flag-east"></div><div class="west-wing-console console-west"><i></i><i></i></div><div class="west-wing-console console-east"><i></i><i></i></div><div class="west-wing-plant plant-a"></div><div class="west-wing-plant plant-b"></div><div class="west-wing-bench bench-a"></div><div class="west-wing-bench bench-b"></div><div class="presidential-seal-floor">★<small>THE WHITE HOUSE</small></div>
-    <div class="white-house-door oval-map-door"><i>★</i><b>{overrideReady ? 'OVERRIDE CHAMBER' : 'OVAL OFFICE'}</b><span>{overrideReady ? 'Finalize the override' : 'Meet the President'}</span></div>
-      <div class="white-house-door briefing-map-door"><i>◈</i><b>PRESS ROOM</b><span>Press Secretary Abner Mendoza</span></div>
-     <div class="white-house-door prep-map-door"><i>▤</i><b>PREPARATION ROOM</b><span>Review your materials</span></div>
-     <div class="white-house-door office-a-map-door"><i>✎</i><b>LEGISLATIVE AFFAIRS</b><span>Congressional coordination</span></div>
-     <div class="white-house-door office-b-map-door"><i>⌁</i><b>WEST WING OPERATIONS</b><span>Schedules and daily logistics</span></div>
-     {#if lincolnReady}<div class="white-house-door lincoln-map-door"><i>✦</i><b>ONE FINAL STOP</b><span>A note from the staff</span></div>{/if}
+   <section class="white-house-map" aria-label="West Wing grid map">
+     <div class="west-wing-camera grid-room" style={`--tile-size:${tileSize}px;transform:translate(${Math.max(-260, Math.min(0, 500 - x))}px,${Math.max(-190, Math.min(0, 360 - y))}px)`}>
+       <div class="west-wing-carpet"></div><div class="west-wing-gallery"></div><div class="west-wing-windows"></div><div class="west-wing-wall west"></div><div class="west-wing-wall east"></div><div class="west-wing-portrait portrait-washington">WASHINGTON</div><div class="west-wing-portrait portrait-lincoln">LINCOLN</div><div class="west-wing-flag flag-west"></div><div class="west-wing-flag flag-east"></div><div class="west-wing-console console-west"><i></i><i></i></div><div class="west-wing-console console-east"><i></i><i></i></div><div class="west-wing-plant plant-a"></div><div class="west-wing-plant plant-b"></div><div class="west-wing-bench bench-a"></div><div class="west-wing-bench bench-b"></div><div class="presidential-seal-floor">★<small>THE WHITE HOUSE</small></div>
+    <button class:nearby-stop={nearby === 'oval'} class="white-house-door oval-map-door" onclick={() => roomOpen = 'oval'}><i>★</i><b>{overrideReady ? 'OVERRIDE CHAMBER' : 'OVAL OFFICE'}</b><span>{overrideReady ? 'Finalize the override' : 'Meet the President'}</span></button>
+      <button class:nearby-stop={nearby === 'press'} class="white-house-door briefing-map-door" onclick={() => roomOpen = 'press'}><i>◈</i><b>PRESS ROOM</b><span>Press Secretary Abner Mendoza</span></button>
+     <button class:nearby-stop={nearby === 'prep'} class="white-house-door prep-map-door" onclick={() => roomOpen = 'prep'}><i>▤</i><b>PREPARATION ROOM</b><span>Review your materials</span></button>
+     <button class:nearby-stop={nearby === 'office-a'} class="white-house-door office-a-map-door" onclick={() => roomOpen = 'office-a'}><i>✎</i><b>LEGISLATIVE AFFAIRS</b><span>Congressional coordination</span></button>
+     <button class:nearby-stop={nearby === 'office-b'} class="white-house-door office-b-map-door" onclick={() => roomOpen = 'office-b'}><i>⌁</i><b>WEST WING OPERATIONS</b><span>Schedules and daily logistics</span></button>
+     {#if lincolnReady}<button class:nearby-stop={nearby === 'lincoln'} class="white-house-door lincoln-map-door" onclick={() => roomOpen = 'lincoln'}><i>✦</i><b>ONE FINAL STOP</b><span>A note from the staff</span></button>{/if}
      <div class="white-house-player" style={`left:${x}px;top:${y}px`}><span></span>REP</div>
-    </div>
-      {#if nearby}<div class="white-house-prompt">E · {nearby === 'oval' ? 'ENTER THE OVAL OFFICE' : nearby === 'press' ? 'ENTER PRESS ROOM' : nearby === 'prep' ? 'ENTER PREPARATION ROOM' : nearby === 'office-a' || nearby === 'office-b' ? 'PEEK INTO STAFF OFFICE' : 'READ STAFF NOTE'}</div>{/if}
+     </div>
+       {#if nearby}<div class="white-house-prompt">E · {nearby === 'oval' ? 'ENTER THE OVAL OFFICE' : nearby === 'press' ? 'ENTER PRESS ROOM' : nearby === 'prep' ? 'ENTER PREPARATION ROOM' : nearby === 'office-a' || nearby === 'office-b' ? 'PEEK INTO STAFF OFFICE' : 'READ STAFF NOTE'}</div>{/if}
   </section>
   <div class="white-house-controls"><button onclick={() => nudge(-1,0)}>◀</button><button onclick={() => nudge(0,-1)}>▲</button><button onclick={interact}>E</button><button onclick={() => nudge(0,1)}>▼</button><button onclick={() => nudge(1,0)}>▶</button></div>
   <footer>{ovalOfficeDialogue.hallway}</footer>

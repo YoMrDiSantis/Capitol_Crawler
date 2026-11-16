@@ -37,9 +37,10 @@
    import DcOverworld from './DcOverworld.svelte';
    import LandmarkCard from './LandmarkCard.svelte';
   import RotundaShop, { type Inventory, type PowerUpId } from './RotundaShop.svelte';
-  import Notebook from './Notebook.svelte';
-  import TitleScreen from './TitleScreen.svelte';
-  import World from './World.svelte';
+   import Notebook from './Notebook.svelte';
+   import TitleScreen from './TitleScreen.svelte';
+   import World from './World.svelte';
+   import { defaultHouseLayout, HOUSE_LAYOUT_KEY, isHouseLayout, type HouseLayout } from './house-layout';
   import AboutPage from './AboutPage.svelte';
   import PrivacyPage from './PrivacyPage.svelte';
   import { route } from './route.svelte';
@@ -49,7 +50,8 @@
 import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLedger, houseQuestionIds, requiredVotes, senateEncounters, senateQuestionIds, type Encounter, type HouseVoteLedger } from './game';
   import { oppositeTrait, traitPairs, type Trait } from './npc-dialogue';
 
-  type Save = {
+   const rotundaShopQuestionIds = [7, 10, 14, 20, 23, 30, 37, 41, 48, 51, 58, 63, 65, 67, 69, 73, 77, 80, 81, 83, 91, 93, 99, 100, 106, 113, 117, 121, 126, 127];
+   type Save = {
     version: 28; playerX: number; playerY: number; votes: number; influence: number; completed: string[]; locked: string[];
       committeeStatus: string; committeeAmendments: string[]; encounteredQuestionIds: number[]; correctQuestionIds: number[]; notebookQuestionIds: number[]; notebookSources: Record<number, string>; touristClaims: string[]; delNotebookCountAtContact: number | null; committeeQuestionIds: number[]; filibusterQuestionIds: number[]; filibusterIntroSeen?: boolean; overtimeQuestionIds: number[]; ovalOfficeQuestionIds: number[]; attempts: Record<string, number>; rapportScores: Record<string, number>; leaderTraits: Record<string, Trait>; stanceTags: Trait[]; scoutedLeaders: string[]; archiveBriefingRecovered: boolean; priyaBriefcaseRecovered: boolean; abbonizioOfficeClosed?: boolean; houseLedger: HouseVoteLedger; inventory: Inventory; housePassageSeen: boolean; benTutorialComplete: boolean; senateVotes: number; senateCompleted: string[]; senateLocked: string[]; senateAttempts: Record<string, number>; filibusterResolved: boolean; resolvedHolds: string[]; gridlock: boolean; rogueNodes: number[]; bossAttempts: string[]; whiteHouseUnlocked: boolean; presidentAlignment: 'ally' | 'opposition'; billBecameLaw: boolean; scoreLocked: boolean; overrideActive: boolean; jurisdictionCode: string; city: string; minutes: number; completionMinutes: number | null; ovalOfficeAccuracyBonus: number; washingtonGhostComplete: boolean; lincolnGhostComplete: boolean; ghostWhispers: string[]; seenVocabulary: string[]; vocabularyEasterEggSeen: boolean; playerName: string; playerFirstName: string; playerLastName: string; playerPresentation: 'female' | 'male'; playerSkinTone: string; playerParty: 'D' | 'R'; completionRoute: 'signed' | 'override'; duncanFound: boolean;
   };
@@ -132,6 +134,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   let wrenWasFirstMeeting = $state(false);
   let touristClaims = $state<string[]>([]);
    let touristPanelOpen = $state(false);
+   let touristVisitorName = $state('');
    let landmarkCard = $state<string | null>(null);
   let houseContactOpen = $state(false);
   let archiveBriefingRecovered = $state(false);
@@ -146,6 +149,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   let lastCompletion = $state<CompletionRecord | null>(null);
   let resolvedHolds = $state<string[]>([]);
   let activeHoldId = $state<string | null>(null);
+  let corinneHoldQuestionId = $state<number | null>(null);
   let activeLevel = $state<'house' | 'senate'>('house');
   let shopOpen = $state(false);
   let notebookTab = $state<'entries' | 'vocabulary'>('entries');
@@ -165,9 +169,13 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   let minutes = $state(8 * 60);
   let houseLedger = $state<HouseVoteLedger>(generateHouseVoteLedger());
   let notebookOpen = $state(false);
+   let focusedNotebookEntryIds = $state<number[]>([]);
   let announcement = $state('');
+   let studyNotice = $state<{ questionId: number; question: string; answer: string; stepsRemaining: number; questionIds?: number[] } | null>(null);
   let hasSave = $state(false);
-  let showBrief = $state(true);
+   let showBrief = $state(true);
+   let houseLayout = $state<HouseLayout>(defaultHouseLayout);
+   let buildMode = $state(false);
 
   let notes = $derived(civicsQuestionIds(notebookQuestionIds).map((id) => {
     const question = civicsQuestionById.get(id)!;
@@ -193,10 +201,19 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   let notebookEntryPoints = $derived(notes.length * 10);
   let finalScore = $derived(2000 + correctAnswerPoints + notebookEntryPoints + ovalOfficeAccuracyBonus + (notes.length === 128 ? 2000 : 0) + speedBonus + Math.min(3200, influence * 3));
 
-  onMount(() => {
-    hasSave = Boolean(localStorage.getItem(SAVE_KEY));
-    try { lastCompletion = JSON.parse(localStorage.getItem(CERTIFICATE_KEY) ?? 'null') as CompletionRecord | null; } catch { lastCompletion = null; }
-  });
+   onMount(() => {
+     hasSave = Boolean(localStorage.getItem(SAVE_KEY));
+     try { lastCompletion = JSON.parse(localStorage.getItem(CERTIFICATE_KEY) ?? 'null') as CompletionRecord | null; } catch { lastCompletion = null; }
+     try {
+       const savedLayout = JSON.parse(localStorage.getItem(HOUSE_LAYOUT_KEY) ?? 'null');
+       if (isHouseLayout(savedLayout)) houseLayout = savedLayout;
+     } catch { houseLayout = defaultHouseLayout; }
+   });
+
+   function updateHouseLayout(layout: HouseLayout) {
+     houseLayout = layout;
+     localStorage.setItem(HOUSE_LAYOUT_KEY, JSON.stringify(layout));
+   }
 
   function save() {
     const data: Save = { version: 28, playerX, playerY, votes, influence, completed, locked, committeeStatus, committeeAmendments, encounteredQuestionIds, correctQuestionIds, notebookQuestionIds, notebookSources, touristClaims, delNotebookCountAtContact, committeeQuestionIds, filibusterQuestionIds, filibusterIntroSeen, overtimeQuestionIds, ovalOfficeQuestionIds, attempts, rapportScores, leaderTraits, stanceTags, scoutedLeaders, archiveBriefingRecovered, priyaBriefcaseRecovered, abbonizioOfficeClosed, houseLedger, inventory, housePassageSeen, benTutorialComplete, senateVotes, senateCompleted, senateLocked, senateAttempts, filibusterResolved, resolvedHolds, gridlock, rogueNodes, bossAttempts, whiteHouseUnlocked, presidentAlignment, billBecameLaw, scoreLocked, overrideActive, jurisdictionCode, city, minutes, completionMinutes, ovalOfficeAccuracyBonus, washingtonGhostComplete, lincolnGhostComplete, ghostWhispers, seenVocabulary, vocabularyEasterEggSeen, playerName, playerFirstName, playerLastName, playerPresentation, playerSkinTone, playerParty, completionRoute, duncanFound };
@@ -206,7 +223,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
 
   function newGame() {
     playerX = 3000; playerY = 900; votes = 0; influence = 0; completed = []; locked = []; committeeStatus = 'Not started'; committeeAmendments = []; committeeOpen = false; committeeAmbushOpen = false; committeeAmbushQuestionId = null; committeeEased = false; inventory = { coffee: 0, memo: 0, hearingAid: 0, superPac: 0 }; houseLedger = generateHouseVoteLedger(); housePassageSeen = false; housePassageOpen = false; benTutorialComplete = false; benTutorialOpen = false; senateVotes = 0; senateCompleted = []; senateLocked = []; senateAttempts = {}; filibusterIntroSeen = false; filibusterResolved = false; resolvedHolds = []; gridlock = false; rogueNodes = []; bossAttempts = []; whiteHouseUnlocked = false; presidentAlignment = Math.random() < .5 ? 'ally' : 'opposition'; billBecameLaw = false; scoreLocked = false; overrideActive = false; jurisdictionCode = ''; city = ''; profileOpen = true;
-    attempts = {}; rapportScores = {}; leaderTraits = {}; stanceTags = []; scoutedLeaders = []; touristClaims = []; archiveBriefingRecovered = false; priyaBriefcaseRecovered = false; abbonizioOfficeClosed = false; encounteredQuestionIds = []; correctQuestionIds = []; notebookQuestionIds = []; notebookSources = {}; committeeQuestionIds = []; filibusterQuestionIds = []; overtimeQuestionIds = []; ovalOfficeQuestionIds = []; activeQuestionId = null; minutes = 8 * 60; completionMinutes = null; ovalOfficeAccuracyBonus = 0; washingtonGhostComplete = false; lincolnGhostComplete = false; ghostWhispers = []; seenVocabulary = []; vocabularyEasterEggSeen = false; playerName = 'Representative'; playerFirstName = ''; playerLastName = ''; playerParty = 'D'; completionRoute = 'signed'; duncanFound = false;
+    attempts = {}; rapportScores = {}; leaderTraits = {}; stanceTags = []; scoutedLeaders = []; touristClaims = []; archiveBriefingRecovered = false; priyaBriefcaseRecovered = false; abbonizioOfficeClosed = false; encounteredQuestionIds = []; correctQuestionIds = []; notebookQuestionIds = []; notebookSources = {}; committeeQuestionIds = []; filibusterQuestionIds = []; overtimeQuestionIds = []; ovalOfficeQuestionIds = []; activeQuestionId = null; corinneHoldQuestionId = null; minutes = 8 * 60; completionMinutes = null; ovalOfficeAccuracyBonus = 0; washingtonGhostComplete = false; lincolnGhostComplete = false; ghostWhispers = []; seenVocabulary = []; vocabularyEasterEggSeen = false; playerName = 'Representative'; playerFirstName = ''; playerLastName = ''; playerParty = 'D'; completionRoute = 'signed'; duncanFound = false;
     screen = 'rotunda'; showBrief = false; characterCreationOpen = true; save();
   }
 
@@ -245,15 +262,28 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
 
   function reserveQuestions(pool: number[], count: number) {
     const available = pool.filter((id) => !encounteredQuestionIds.includes(id) && isEligibleLiveQuestion(id));
-    const reserved = available.slice(0, count);
+    const reserved = shuffleQuestions(available).slice(0, count);
     encounteredQuestionIds = [...encounteredQuestionIds, ...reserved];
     return reserved;
+  }
+
+  function shuffleQuestions(ids: number[]) {
+    const shuffled = [...ids];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    return shuffled;
   }
 
   function beginEncounter(encounter: Encounter) {
     if (screen === 'game') activeLevel = 'house';
     if (encounter.id === 'del-ashworth' && delNotebookCountAtContact === null) delNotebookCountAtContact = notebookQuestionIds.length;
     if (activeLevel === 'senate' && isHoldLeader(encounter.id) && !resolvedHolds.includes(encounter.id)) {
+      if (encounter.id === 'corinne-vasquez' && corinneHoldQuestionId === null) {
+        corinneHoldQuestionId = shuffleQuestions(senateQuestionIds(true)
+          .filter((id) => !encounteredQuestionIds.includes(id) && isEligibleLiveQuestion(id)))[0] ?? 73;
+      }
       activeHoldId = encounter.id;
       return;
     }
@@ -302,12 +332,14 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   function updateRapport(choice: Trait | 'neutral') {
     if (!active) return { rapport: 50, message: 'Rapport unchanged.' };
     const preferred = activeTraitFor(active.id);
-    const current = rapportScores[active.id] ?? 50;
+    // A night conversation is easier, but its temporary context bonus should not
+    // become permanent Rapport after the player leaves the encounter.
+    const current = (rapportScores[active.id] ?? 50) + activeRapportBonus;
     if (choice === 'neutral') return { rapport: current, message: 'Rapport unchanged: you chose a respectful, neutral response.' };
     const change = choice === preferred ? 15 : -15;
     const contradiction = stanceTags.includes(oppositeTrait(choice));
     const nextRapport = Math.max(0, Math.min(100, current + change + (contradiction ? -5 : 0)));
-    rapportScores = { ...rapportScores, [active.id]: nextRapport };
+    rapportScores = { ...rapportScores, [active.id]: Math.max(0, Math.min(100, nextRapport - activeRapportBonus)) };
     stanceTags = [...stanceTags, choice];
     save();
     const outcome = `Rapport ${change > 0 ? '+' : ''}${change}: ${change > 0 ? 'they appreciated that approach.' : 'that approach did not land well.'}`;
@@ -329,7 +361,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     leaderTraits = { ...leaderTraits, [id]: activeTraitFor(id) };
   }
   function hasRapportPhase(encounter: Encounter) {
-    return !encounter.title.includes('Loner');
+    return true;
   }
 
   function beginNightAlternate(id: string) {
@@ -447,21 +479,21 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   function returnFromHouseRoom(roomId: NonNullable<typeof mapRoom>['roomId']) {
     // Each position is outside its door and inside the main House walkable area.
     const exits = {
-      'west-cloakroom': { x: 1050, y: 685 },
-      'east-cloakroom': { x: 6500, y: 685 },
-      'west-caucus': { x: 1675, y: 520 },
-      'east-caucus': { x: 5350, y: 520 }
+      'west-cloakroom': { x: 960, y: 720 },
+      'east-cloakroom': { x: 6640, y: 720 },
+      'west-caucus': { x: 1680, y: 440 },
+      'east-caucus': { x: 5360, y: 440 }
     } as const;
     const exit = exits[roomId];
     playerX = exit.x;
     playerY = exit.y;
-    houseInteractionBlocked = true;
+    houseInteractionBlocked = false;
     mapRoom = null;
     requestAnimationFrame(() => (document.activeElement as HTMLElement | null)?.blur());
   }
 
   function buyPowerUp(item: PowerUpId, cost: number) {
-    if (influence < cost || inventory[item] >= 3) return;
+    if (influence < cost || inventory[item] >= (item === 'superPac' ? 2 : 3)) return;
     influence -= cost;
     inventory = { ...inventory, [item]: inventory[item] + 1 };
     save();
@@ -471,7 +503,8 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     influence -= 25;
     notebookQuestionIds = [...notebookQuestionIds, questionId];
     notebookSources = { ...notebookSources, [questionId]: 'Rotunda Shop' };
-    announcement = `Notebook entry added: Question ${questionId}.`;
+    influence += 15;
+    announcement = `Notebook entry added: Question ${questionId}. +15 INF.`;
     save();
   }
 
@@ -503,7 +536,6 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     // Always enter the House at an open aisle in the main chamber, never inside a room boundary.
     if (playerX < 350 || playerX > 7000 || playerY < 420 || playerY > 1300) { playerX = 3000; playerY = 900; }
     showBrief = false;
-    if (!benTutorialComplete) benTutorialOpen = true;
   }
 
   function finishBenTutorial() {
@@ -530,6 +562,9 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     if (!activeHoldId || !result.resolved) return;
     if (result.spent) influence -= result.spent;
     resolvedHolds = [...resolvedHolds, activeHoldId];
+    if (activeHoldId === 'corinne-vasquez' && corinneHoldQuestionId !== null && !encounteredQuestionIds.includes(corinneHoldQuestionId)) {
+      encounteredQuestionIds = [...encounteredQuestionIds, corinneHoldQuestionId];
+    }
     announcement = 'Hold released. This Senator is now available to meet.';
     activeHoldId = null;
     save();
@@ -601,9 +636,13 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     if (overrideActive && votes >= 290 && senateVotes >= 67) { overrideFinaleOpen = true; return; }
     // The Oval Office is a separate final assessment. It draws from the full curriculum
     // without consuming or being limited by the campaign's no-duplicate encounter pool.
-    ovalOfficeQuestionIds = [...civicsQuestionById.keys()]
-      .filter(isEligibleLiveQuestion)
+    ovalOfficeQuestionIds = shuffleQuestions([...civicsQuestionById.keys()]
+      .filter((id) => !encounteredQuestionIds.includes(id) && isEligibleLiveQuestion(id)))
       .slice(0, presidentAlignment === 'ally' ? 20 : 10);
+    if (ovalOfficeQuestionIds.length < (presidentAlignment === 'ally' ? 20 : 10)) {
+      ovalOfficeQuestionIds = shuffleQuestions([...civicsQuestionById.keys()].filter(isEligibleLiveQuestion))
+        .slice(0, presidentAlignment === 'ally' ? 20 : 10);
+    }
     ovalOfficeOpen = true;
   }
 
@@ -677,20 +716,30 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     profileOpen = true;
     save();
   }
+  function sourceAlreadyCollected(source: string) {
+    return Object.values(notebookSources).includes(source);
+  }
+  function randomFieldEntries(count: number) {
+    const available = [...civicsQuestionById.keys()].filter((id) => !rotundaShopQuestionIds.includes(id) && !notebookQuestionIds.includes(id));
+    const shuffled = [...available].sort(() => Math.random() - .5);
+    return shuffled.slice(0, count);
+  }
   function discoverNotebookEntry(source = 'Hidden D.C. map find') {
-    const available = [...civicsQuestionById.keys()].filter((id) => !notebookQuestionIds.includes(id));
-    if (!available.length) { announcement = 'You have already collected every Notebook study entry.'; return; }
-    const id = available[(notebookQuestionIds.length * 17 + encounteredQuestionIds.length) % available.length];
+    if (sourceAlreadyCollected(source)) { announcement = `You have already collected the study entry from ${source}.`; return undefined; }
+    const [id] = randomFieldEntries(1);
+    if (id === undefined) { announcement = 'You have already collected every field Notebook study entry.'; return undefined; }
     notebookQuestionIds = [...notebookQuestionIds, id];
     notebookSources = { ...notebookSources, [id]: source };
+    influence += 15;
     const question = civicsQuestionById.get(id)!;
-    announcement = `Oh look! You found Question ${id}: ${question.prompt}`;
+    studyNotice = { questionId: id, question: question.prompt, answer: question.acceptedAnswers[0], stepsRemaining: 5 };
+    announcement = `Oh look! You found Question ${id}: ${question.prompt} +15 INF.`;
     save();
+    return { question: question.prompt, answer: question.acceptedAnswers[0] };
   }
   function waitForNextPeriod() { const hour = Math.floor(minutes / 60) % 24; const target = hour >= 20 || hour < 6 ? 6 * 60 : 20 * 60; minutes = (target > minutes ? target : target + 1440) % 1440; save(); }
-  function addSpecificNotebookEntry(id: number, source: string) { if (!notebookQuestionIds.includes(id)) { notebookQuestionIds = [...notebookQuestionIds, id]; notebookSources = { ...notebookSources, [id]: source }; } save(); }
-  function finishWashingtonGhost() { washingtonGhostOpen = false; washingtonGhostComplete = true; addSpecificNotebookEntry(37, 'Ghost of George Washington'); announcement = 'You earned the Ghost of Washington Notebook entry.'; }
-  function finishLincolnGhost() { lincolnGhostOpen = false; lincolnGhostComplete = true; addSpecificNotebookEntry(95, 'Ghost of Abraham Lincoln'); announcement = 'You earned the final Ghost of Lincoln Notebook entry.'; }
+  function finishWashingtonGhost() { washingtonGhostOpen = false; washingtonGhostComplete = true; discoverNotebookEntry('Ghost of George Washington'); }
+  function finishLincolnGhost() { lincolnGhostOpen = false; lincolnGhostComplete = true; discoverNotebookEntry('Ghost of Abraham Lincoln'); }
   function hearGhostWhisper(ghost: 'washington' | 'lincoln') {
     const key = `whisper-${ghost}`;
     if (!ghostWhispers.includes(key)) ghostWhispers = [...ghostWhispers, key];
@@ -709,29 +758,30 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   function meetDuncan() {
     if (duncanFound) return;
     duncanFound = true;
-    const available = [...civicsQuestionById.keys()].filter((id) => !notebookQuestionIds.includes(id));
-    const pack = available.slice(0, 5);
+    const pack = randomFieldEntries(5);
     notebookQuestionIds = [...notebookQuestionIds, ...pack];
     notebookSources = { ...notebookSources, ...Object.fromEntries(pack.map((id) => [id, 'Duncan Johnson 5-pack'])) };
-    announcement = `Duncan Johnson shares a 5-pack of Notebook study entries as a special thank you: Questions ${pack.join(', ')}.`;
+    influence += pack.length * 15;
+    announcement = `Duncan Johnson shares a 5-pack of Notebook study entries as a special thank you: Questions ${pack.join(', ')}. +${pack.length * 15} INF.`;
     save();
   }
   function claimTouristPack(id: string, count: number, source: string) {
     if (touristClaims.includes(id)) return;
-    const available = [...civicsQuestionById.keys()].filter((questionId) => !notebookQuestionIds.includes(questionId));
-    const pack = available.slice(0, count);
+    const pack = randomFieldEntries(count);
     touristClaims = [...touristClaims, id];
     notebookQuestionIds = [...notebookQuestionIds, ...pack];
     notebookSources = { ...notebookSources, ...Object.fromEntries(pack.map((questionId) => [questionId, `${source} ${count}-pack`])) };
-    announcement = `${source} shared ${pack.length} new Notebook study ${pack.length === 1 ? 'entry' : 'entries'}.`;
+    influence += pack.length * 15;
+    const question = pack.length ? civicsQuestionById.get(pack[0]) : null;
+     if (question) studyNotice = { questionId: question.id, question: question.prompt, answer: question.acceptedAnswers[0], stepsRemaining: 5, questionIds: pack };
+    announcement = `${source} shared ${pack.length} new Notebook study ${pack.length === 1 ? 'entry' : 'entries'}. +${pack.length * 15} INF.`;
     save();
   }
   function finishScouting() {
     if (!scoutLeaderId) return;
     scoutedLeaders = [...scoutedLeaders, scoutLeaderId];
-    const intelQuestionId = scoutLeaderId === 'augustus-kane' ? 83 : 113;
-    notebookQuestionIds = notebookQuestionIds.includes(intelQuestionId) ? notebookQuestionIds : [...notebookQuestionIds, intelQuestionId];
-    notebookSources = { ...notebookSources, [intelQuestionId]: scoutLeaderId === 'augustus-kane' ? 'Cloakroom scouting intel' : 'Press Row scouting intel' };
+    const source = scoutLeaderId === 'augustus-kane' ? 'Cloakroom scouting intel' : 'Press Row scouting intel';
+    discoverNotebookEntry(source);
     scoutLeaderId = null;
     announcement = 'Scouting intel logged. You now have a reliable Rapport clue for that Senator.';
     save();
@@ -746,9 +796,9 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   {#if screen === 'title'}
     <TitleScreen canContinue={hasSave} hasCertificate={Boolean(lastCompletion)} onstart={newGame} oncontinue={continueGame} oncertificate={() => { if (lastCompletion) certificateOpen = true; }} oncredits={() => assetCreditsOpen = true} />
   {:else if screen === 'rotunda'}
-    <RotundaMap housePassed={votes >= requiredVotes} onhouse={enterHouse} onshop={() => shopOpen = true} onbill={() => billScrollOpen = true} onnotebook={() => { notebookTab = 'entries'; notebookOpen = true; }} onguide={() => { notebookTab = 'vocabulary'; notebookOpen = true; }} onprofile={openProfile} ondc={() => screen = 'dc'} onsenate={enterSenate} ondiscover={() => discoverNotebookEntry('Rotunda Civics Exhibit')} />
+    <RotundaMap housePassed={votes >= requiredVotes} tutorialComplete={benTutorialComplete} {playerName} playerPresentation={playerPresentation} playerSkinTone={playerSkinTone} playerParty={playerParty} onhouse={enterHouse} onshop={() => shopOpen = true} onbill={() => billScrollOpen = true} onnotebook={() => { notebookTab = 'entries'; notebookOpen = true; }} onguide={() => { notebookTab = 'vocabulary'; notebookOpen = true; }} onprofile={openProfile} ondc={() => screen = 'dc'} onsenate={enterSenate} ondiscover={() => discoverNotebookEntry('Rotunda Civics Exhibit')} ontutorial={() => benTutorialOpen = true} />
     {:else if screen === 'dc'}
-      <DcOverworld {minutes} whiteHouseOpen={whiteHouseUnlocked} notebookEntries={notes.length} onrotunda={() => screen='rotunda'} onwait={waitForNextPeriod} onspot={(spot) => landmarkCard = spot} />
+      <DcOverworld {minutes} whiteHouseOpen={whiteHouseUnlocked} notebookEntries={notes.length} {touristClaims} washingtonGhostComplete={washingtonGhostComplete} lincolnGhostComplete={lincolnGhostComplete} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} playerParty={playerParty} onrotunda={() => screen='rotunda'} onwashington={() => washingtonGhostOpen = true} onlincoln={() => lincolnGhostOpen = true} onwait={waitForNextPeriod} onspot={(spot) => landmarkCard = spot} ontourist={(name) => { touristVisitorName = name; touristPanelOpen = true; }} />
   {:else if screen === 'whiteHouse'}
     <WhiteHouse overrideReady={overrideActive && votes >= 290 && senateVotes >= 67} lincolnReady={notes.length >= 127 && !lincolnGhostComplete} onshop={() => shopOpen = true} onbill={() => billScrollOpen = true} onnotebook={() => notebookOpen = true} onreturn={() => screen = 'dc'} onovaloffice={enterOvalOffice} onlincoln={() => { announcement = 'Lincoln Memorial is now available as an optional stop on the D.C. map before you enter the Oval Office.'; screen = 'dc'; }} />
   {:else if screen === 'archive'}
@@ -761,7 +811,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     <main class="game-shell senate-shell">
       <header class="hud"><div class="brand"><span>CHC</span><div>CAPITOL HILL<strong>CRAWLER</strong></div></div><div class="bill-name"><span>SENATE FLOOR</span><strong>CONNECTED CLASSROOMS ACT</strong></div><div class="hud-actions"><button onclick={() => screen = 'rotunda'}>← ROTUNDA</button><button onclick={() => screen = 'subway'}>♢ CLOAKROOM</button><button onclick={() => { notebookTab = 'vocabulary'; notebookOpen = true; }}>? GUIDE</button><button onclick={() => { notebookTab = 'entries'; notebookOpen = true; }}>▤ NOTEBOOK <b>{notes.length}</b></button></div></header>
       <section class="vote-board"><div><span>{overrideActive ? 'SENATE OVERRIDE' : 'SENATE SUPPORT'}</span><strong>{senateVotes} <small>/ {overrideActive ? 67 : 60}</small></strong></div><div class="meter"><i style:width={`${Math.min(100, Math.round(senateVotes / (overrideActive ? 67 : 60) * 100))}%`}></i><span class="threshold">{overrideActive ? 67 : 60}</span></div><div class="inf"><span>INFLUENCE</span><strong>{influence} INF</strong></div></section>
-      <SenateMap encounters={alignedSenateEncounters} completed={senateCompleted} locked={senateLocked} held={['eleanor-vance', 'corinne-vasquez', 'del-ashworth', 'priya-okafor-lin'].filter((id) => !resolvedHolds.includes(id))} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} playerX={senatePlayerX} playerY={senatePlayerY} leadershipOfficeClosed={abbonizioOfficeClosed} onmove={(x, y) => { senatePlayerX = x; senatePlayerY = y; }} oninteract={(encounter) => { if(gridlock && !['augustus-kane','lucia-marchetti'].includes(encounter.id)){announcement='Gridlock has stalled regular Senate meetings. Use the Cloakroom and Subway route to break the deadlock.';return;} if(['augustus-kane','lucia-marchetti'].includes(encounter.id)){if(!gridlock){announcement='These extreme leaders become an Overtime option if the Filibuster creates Gridlock. You can still scout them in the Cloakroom and Subway.';return;} screen='subway';return;} if(encounter.id==='eleanor-vance'&&!archiveBriefingRecovered){activeHoldId='eleanor-vance';return;} beginEncounter(encounter); }} onrotunda={() => screen='rotunda'} onarchive={() => { activeHoldId='eleanor-vance'; }} onovertime={() => screen='subway'} onprop={(prop) => { if (prop === 'leadership-office') { screen = 'office'; } else if (prop === 'leadership-office-locked') announcement = 'Sen. Abbonizio’s office is locked. The briefcase delivery is complete.'; else if (prop === 'senate-clerk') discoverNotebookEntry("Senate clerk's table"); else if (prop === 'senate-papers') discoverNotebookEntry('Senate floor papers'); else if (prop === 'senate-ledger') discoverNotebookEntry('Senate vote ledger'); else if (prop === 'senate-staff') announcement = 'A floor staffer points you toward the Senate rules board and reminds you to prepare before a hard conversation.'; else announcement = 'A Senate page shares the day’s schedule and suggests checking the Cloakrooms for staff contacts.'; }} />
+      <SenateMap encounters={alignedSenateEncounters} completed={senateCompleted} locked={senateLocked} held={['eleanor-vance', 'corinne-vasquez', 'del-ashworth', 'priya-okafor-lin'].filter((id) => !resolvedHolds.includes(id))} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} playerParty={playerParty} playerX={senatePlayerX} playerY={senatePlayerY} leadershipOfficeClosed={abbonizioOfficeClosed} onmove={(x, y) => { senatePlayerX = x; senatePlayerY = y; }} oninteract={(encounter) => { if(gridlock && !['augustus-kane','lucia-marchetti'].includes(encounter.id)){announcement='Gridlock has stalled regular Senate meetings. Use the Cloakroom and Subway route to break the deadlock.';return;} if(['augustus-kane','lucia-marchetti'].includes(encounter.id)){if(!gridlock){announcement='These extreme leaders become an Overtime option if the Filibuster creates Gridlock. You can still scout them in the Cloakroom and Subway.';return;} screen='subway';return;} if(encounter.id==='eleanor-vance'&&!archiveBriefingRecovered){activeHoldId='eleanor-vance';return;} beginEncounter(encounter); }} onrotunda={() => screen='rotunda'} onarchive={() => { activeHoldId='eleanor-vance'; }} onovertime={() => screen='subway'} onprop={(prop) => { if (prop === 'leadership-office') { screen = 'office'; } else if (prop === 'leadership-office-locked') announcement = 'Sen. Abbonizio’s office is locked. The briefcase delivery is complete.'; else if (prop === 'senate-clerk') discoverNotebookEntry("Senate clerk's table"); else if (prop === 'senate-papers') discoverNotebookEntry('Senate floor papers'); else if (prop === 'senate-ledger') discoverNotebookEntry('Senate vote ledger'); else if (prop === 'senate-board-west') discoverNotebookEntry('West Gallery Senate message board'); else if (prop === 'senate-board-east') discoverNotebookEntry('East Gallery Senate message board'); else if (prop === 'senate-staff') announcement = 'A floor staffer points you toward the Senate rules board and reminds you to prepare before a hard conversation.'; else announcement = 'A Senate page shares the day’s schedule and suggests checking the Cloakrooms for staff contacts.'; }} />
       <footer class="statusbar"><div><span>FILIBUSTER</span><strong class:ready={senateVotes >= 50}>{gridlock ? 'Gridlock · Subway route open' : filibusterResolved ? 'Resolved' : senateVotes >= 50 ? 'Gauntlet ready' : 'Build support to 50'}</strong></div><p>{overrideActive ? `Veto override: ${senateVotes} / 67 Senate votes. Return to the White House when both chambers are ready.` : gridlock ? 'Use the Cloakroom and Subway route to break Gridlock.' : `${senateEncounters.length - senateCompleted.length} Senate leaders remain in this chamber.`}</p>{#if overrideActive && votes >= 290 && senateVotes >= 67}<button class="overtime-button" onclick={returnToOverrideFinale}>WHITE HOUSE</button>{:else}<button class="overtime-button" disabled={!gridlock} onclick={() => screen = 'subway'}>SUBWAY</button>{/if}</footer>
     </main>
   {:else}
@@ -769,7 +819,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
       <header class="hud">
         <div class="brand"><span>CHC</span><div>CAPITOL HILL<strong>CRAWLER</strong></div></div>
         <div class="bill-name"><span>H.R. 218</span><strong>CONNECTED SCHOOLS ACT</strong></div>
-          <div class="hud-actions"><button onclick={() => houseContactOpen = true}>☏ LEADERS</button><button onclick={() => billScrollOpen = true}>▧ BILL</button><button onclick={() => { notebookTab = 'vocabulary'; notebookOpen = true; }}>? GUIDE</button><button onclick={() => { notebookTab = 'entries'; notebookOpen = true; }}>▤ NOTEBOOK <b>{notes.length}</b></button><button onclick={() => shopOpen = true}>◈ SHOP</button><button aria-label="Reset game" onclick={reset}>⚙</button></div>
+          <div class="hud-actions"><button onclick={() => houseContactOpen = true}>☏ LEADERS</button><button onclick={() => billScrollOpen = true}>▧ BILL</button><button onclick={() => { notebookTab = 'vocabulary'; notebookOpen = true; }}>? GUIDE</button><button onclick={() => { notebookTab = 'entries'; notebookOpen = true; }}>▤ NOTEBOOK <b>{notes.length}</b></button><button onclick={() => shopOpen = true}>◈ SHOP</button><button onclick={() => buildMode = true}>BUILD</button><button aria-label="Reset game" onclick={reset}>⚙</button></div>
       </header>
       <section class="vote-board">
         <div><span>{overrideActive ? 'HOUSE OVERRIDE' : 'HOUSE SUPPORT'}</span><strong>{votes} <small>/ {overrideActive ? 290 : requiredVotes}</small></strong>{#if votes >= 290}<em>VETO-PROOF</em>{:else if votes >= requiredVotes}<em>SENATE UNLOCKED</em>{/if}</div>
@@ -777,7 +827,7 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
         <div class="inf"><span>INFLUENCE</span><strong>{influence} INF</strong></div>
       </section>
 
-      <World encounters={alignedHouseEncounters} {playerX} {playerY} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} {completed} {locked} paused={Boolean(active) || notebookOpen || showBrief || committeeAmbushOpen || committeeOpen || committeeStatus === 'Markup interrupted' || committeeStatus === 'Markup unlocked' || benTutorialOpen || Boolean(mapRoom)} interactionBlocked={houseInteractionBlocked} onmove={(x, y) => { playerX = x; playerY = y; houseInteractionBlocked = false; }} oninteract={startHouseEncounter} onzone={(zone) => { if (zone === 'house-papers') discoverNotebookEntry('House floor papers'); else if (zone === 'house-ledger') discoverNotebookEntry('House vote ledger'); else if (zone === 'house-briefing') discoverNotebookEntry('House briefing table'); else if (zone === 'rules-office') announcement = 'The Rules Counsel office is locked. A staffer is working behind the frosted glass.'; else if (zone === 'whip-office') announcement = 'The Whip Office is locked. A vote count is underway inside.'; else if (zone === 'budget-office') announcement = 'The Budget Staff office is locked. The papers inside may matter later.'; else useHouseZone(zone); }} />
+      <World encounters={alignedHouseEncounters} {playerX} {playerY} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} playerParty={playerParty} {completed} {locked} paused={Boolean(active) || notebookOpen || showBrief || committeeAmbushOpen || committeeOpen || committeeStatus === 'Markup interrupted' || committeeStatus === 'Markup unlocked' || benTutorialOpen || Boolean(mapRoom)} interactionBlocked={houseInteractionBlocked || buildMode} {houseLayout} builderRequested={buildMode} onbuilderclose={() => buildMode = false} onlayoutchange={updateHouseLayout} onmove={(x, y) => { playerX = x; playerY = y; houseInteractionBlocked = false; if (studyNotice) { const stepsRemaining = studyNotice.stepsRemaining - 1; studyNotice = stepsRemaining > 0 ? { ...studyNotice, stepsRemaining } : null; } }} oninteract={startHouseEncounter} onzone={(zone) => { if (zone === 'ben-venello') discoverNotebookEntry('Mr. Ben Venello House-floor guidance'); else if (zone === 'house-papers') discoverNotebookEntry('House floor papers'); else if (zone === 'house-ledger') discoverNotebookEntry('House vote ledger'); else if (zone === 'house-briefing') discoverNotebookEntry('House briefing table'); else if (zone === 'house-board-west') discoverNotebookEntry('West Corridor message board'); else if (zone === 'house-board-east') discoverNotebookEntry('East Corridor message board'); else if (zone === 'house-board-south') discoverNotebookEntry('House floor message board'); else if (zone === 'rules-office') announcement = 'The Rules Counsel office is locked. A staffer is working behind the frosted glass.'; else if (zone === 'whip-office') announcement = 'The Whip Office is locked. A vote count is underway inside.'; else if (zone === 'budget-office') announcement = 'The Budget Staff office is locked. The papers inside may matter later.'; else useHouseZone(zone); }} />
 
       <footer class="statusbar">
         <div><span>COMMITTEE</span><button class:ready={committeeStatus !== 'Not started'} disabled={committeeStatus === 'Not started'} onclick={openCommittee}>{committeeStatus}</button></div>
@@ -800,17 +850,18 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
     </div>
   {/if}
 
-  {#if active && activeQuestion}<EncounterPanel encounter={active} question={activeQuestion} attempt={((activeLevel === 'senate' ? senateAttempts : attempts)[active.id] ?? 0) + 1} {inventory} playerName={playerName} rapport={rapportScores[active.id] ?? 50} activeTrait={activeTraitFor(active.id)} alternativeTrait={alternativeTraitFor(active.id)} hasRapport={hasRapportPhase(active)} isExtreme={['augustus-kane', 'lucia-marchetti'].includes(active.id)} onrapport={updateRapport} rapportBonus={activeRapportBonus} {resolveDynamicAnswer} onskipdynamic={() => { if (activeQuestionId === 29) representativeLookupOpen = true; }} onuseitem={usePowerUp} oncomplete={resolveEncounter} onclose={() => { active = null; activeQuestionId = null; activeQuestionData = null; activeRapportBonus = 0; requestAnimationFrame(() => (document.activeElement as HTMLElement | null)?.blur()); }} />{/if}
+  {#if active && activeQuestion}<EncounterPanel encounter={active} question={activeQuestion} attempt={((activeLevel === 'senate' ? senateAttempts : attempts)[active.id] ?? 0) + 1} {inventory} playerName={playerName} rapport={Math.min(100, (rapportScores[active.id] ?? 50) + activeRapportBonus)} activeTrait={activeTraitFor(active.id)} alternativeTrait={alternativeTraitFor(active.id)} hasRapport={hasRapportPhase(active)} isExtreme={['augustus-kane', 'lucia-marchetti'].includes(active.id)} onrapport={updateRapport} rapportBonus={activeRapportBonus} {resolveDynamicAnswer} onskipdynamic={() => { if (activeQuestionId === 29) representativeLookupOpen = true; }} onuseitem={usePowerUp} oncomplete={resolveEncounter} onclose={() => { active = null; activeQuestionId = null; activeQuestionData = null; activeRapportBonus = 0; requestAnimationFrame(() => (document.activeElement as HTMLElement | null)?.blur()); }} />{/if}
+   {#if studyNotice}<aside class="study-toast"><button class="dismiss" aria-label="Dismiss study card" onclick={() => studyNotice = null}>×</button><p>NOTEBOOK STUDY FIND</p><strong>{studyNotice.question}</strong><span>{studyNotice.questionIds && studyNotice.questionIds.length > 1 ? `${studyNotice.questionIds.length} new questions are ready to review.` : 'Open your Notebook to review this question.'}</span><button class="open-notebook" onclick={() => { focusedNotebookEntryIds = studyNotice!.questionIds ?? [studyNotice!.questionId]; studyNotice = null; notebookTab = 'entries'; notebookOpen = true; }}>VIEW STUDY FIND</button><small>Review for {studyNotice.stepsRemaining} more steps</small></aside>{/if}
   {#if scoutTrainingOpen}<ScoutTraining leaderName="Rep. Priya Anand" oncomplete={() => { scoutTrainingSeen = true; scoutTargetId = 'priya-anand'; scoutTrainingOpen = false; announcement = 'Your scout has prepared you for Rep. Anand. Find more scouts around the Capitol for optional help.'; save(); }} />{/if}
-  {#if committeeAmbushOpen && committeeAmbushQuestionId !== null}<CommitteeAmbush question={civicsQuestionById.get(committeeAmbushQuestionId)!} oncomplete={finishCommitteeAmbush} />{/if}
-  {#if committeeOpen}<CommitteeDungeon questions={committeeQuestionIds.slice(1).map((id) => civicsQuestionById.get(id)!).filter(Boolean)} committeeVotes={houseLedger.committeeVotes} hasPowerUp={Object.values(inventory).some((count) => count > 0)} adaPrepared={committeeEased} rapport={committeeRapport} onstudy={() => discoverNotebookEntry('Committee reference shelf')} oncomplete={finishCommittee} />{/if}
+   {#if committeeAmbushOpen && committeeAmbushQuestionId !== null}<CommitteeAmbush question={civicsQuestionById.get(committeeAmbushQuestionId)!} superPacAvailable={inventory.superPac > 0} onusesuperpac={() => { inventory = { ...inventory, superPac: inventory.superPac - 1 }; announcement = 'Super PAC support secured a stronger Committee hearing.'; save(); }} oncomplete={finishCommitteeAmbush} />{/if}
+   {#if committeeOpen}<CommitteeDungeon questions={committeeQuestionIds.slice(1).map((id) => civicsQuestionById.get(id)!).filter(Boolean)} committeeVotes={houseLedger.committeeVotes} hasPowerUp={inventory.coffee + inventory.memo + inventory.hearingAid > 0} superPacAvailable={inventory.superPac > 0} adaPrepared={committeeEased} rapport={committeeRapport} onstudy={() => discoverNotebookEntry('Committee reference shelf')} onusesuperpac={() => { inventory = { ...inventory, superPac: inventory.superPac - 1 }; save(); }} oncomplete={finishCommittee} />{/if}
   {#if shopOpen}<RotundaShop {influence} {inventory} filibusterTriggered={senateVotes >= 50 || filibusterResolved} ownedQuestionIds={notebookQuestionIds} onbuyquestion={buyNotebookQuestion} onbuy={buyPowerUp} onclose={() => shopOpen = false} />{/if}
   {#if billScrollOpen}<BillScroll {committeeStatus} approvedAmendments={committeeAmendments} onclose={() => billScrollOpen = false} />{/if}
   {#if housePassageOpen}<HousePassage {votes} oncontinue={continueToRotunda} />{/if}
   {#if benTutorialOpen}<BenTutorial playerName={playerName} oncomplete={finishBenTutorial} />{/if}
   {#if filibusterOpen && !filibusterIntroSeen}<FilibusterIntro oncontinue={() => { filibusterIntroSeen = true; save(); }} />{/if}
   {#if filibusterOpen && filibusterIntroSeen}<FilibusterGauntlet questions={filibusterQuestionIds.map((id) => civicsQuestionById.get(id)!).filter(Boolean)} oncomplete={finishFilibuster} />{/if}
-  {#if activeHoldId}<SenateHold leaderId={activeHoldId} notebookEntries={notes.length} newEntriesSinceContact={activeHoldId === 'del-ashworth' && delNotebookCountAtContact !== null ? Math.max(0, notebookQuestionIds.length - delNotebookCountAtContact) : 0} {influence} question={civicsQuestionById.get(senateQuestionIds().find((id) => !encounteredQuestionIds.includes(id)) ?? 73)!} onresolve={resolveHold} onoffice={() => { activeHoldId = null; screen = 'office'; }} onclose={() => activeHoldId = null} />{/if}
+  {#if activeHoldId}{@const holdQuestion = civicsQuestionById.get(activeHoldId === 'corinne-vasquez' ? corinneHoldQuestionId ?? 73 : senateQuestionIds().find((id) => !encounteredQuestionIds.includes(id)) ?? 73)!}<SenateHold leaderId={activeHoldId} notebookEntries={notes.length} newEntriesSinceContact={activeHoldId === 'del-ashworth' && delNotebookCountAtContact !== null ? Math.max(0, notebookQuestionIds.length - delNotebookCountAtContact) : 0} {influence} question={holdQuestion} onresolve={resolveHold} onoffice={() => { activeHoldId = null; screen = 'office'; }} onclose={() => activeHoldId = null} />{/if}
   {#if clotureOpen}<ClotureTransition oncontinue={openWhiteHouse} />{/if}
   {#if ovalOfficeOpen}<OvalOffice questions={ovalOfficeQuestionIds.map((id) => civicsQuestionById.get(id)!).filter(Boolean)} alignment={presidentAlignment} {inventory} onuseitem={usePowerUp} oncomplete={finishOvalOffice} />{/if}
   {#if celebrationOpen}<BillCelebration playerScore={finalScore} notebookEntries={notes.length} correctAnswerPoints={correctAnswerPoints} {notebookEntryPoints} ovalBonus={ovalOfficeAccuracyBonus} {speedBonus} infBonus={Math.min(3200, influence * 3)} onlock={lockScore} onexplore={continueExploring} />{/if}
@@ -822,13 +873,13 @@ import { applyHouseVoteLedger, encounterModeFor, encounters, generateHouseVoteLe
   {#if representativeLookupOpen}<RepresentativeLookup onskip={skipRepresentativeQuestion} onlookup={() => skipRepresentativeQuestion()} />{/if}
   {#if assetCreditsOpen}<AssetCredits onclose={() => assetCreditsOpen = false} />{/if}
   {#if houseContactOpen}<div class="modal-backdrop"><dialog class="leader-contact-panel" open aria-labelledby="leader-contact-title"><button class="close" aria-label="Close leader directory" onclick={() => houseContactOpen = false}>×</button><p class="eyebrow">HOUSE CONTACT LIST</p><h2 id="leader-contact-title">AVAILABLE LEADERS</h2><p>Select a leader to begin an encounter directly. This is a reliable alternative while the map interaction layer is being refined.</p><div class="leader-contact-list">{#each houseEncounters.filter((encounter) => !completed.includes(encounter.id) && !locked.includes(encounter.id)) as encounter}<button onclick={() => startHouseEncounter(encounter)}><b>{encounter.name}</b><span>{encounter.affiliation} · {encounter.votes} votes</span></button>{/each}</div></dialog></div>{/if}
-  {#if mapRoom}{@const roomScoutTargets = { 'west-caucus': 'priya-anand', 'east-caucus': 'selena-marsh', 'west-cloakroom': 'hank-delgado', 'east-cloakroom': 'naomi-cho' } as const}{@const targetId = roomScoutTargets[mapRoom.roomId]}<MapRoom {...mapRoom} discovered={Object.values(notebookSources).includes(mapRoom.source)} scoutAvailable={houseScoutTargets.includes(targetId)} ondiscover={discoverNotebookEntry} onscout={() => { if (!houseScoutTargets.includes(targetId)) { houseScoutTargets = [...houseScoutTargets, targetId]; announcement = `Scout intel logged for ${houseEncounters.find((encounter) => encounter.id === targetId)?.name}. Watch for what they value in the Rapport conversation.`; save(); } }} onreturn={() => returnFromHouseRoom(mapRoom!.roomId)} />{/if}
+   {#if mapRoom}{@const roomScoutTargets = { 'west-caucus': ['priya-anand', 'diane-okafor'], 'east-caucus': ['selena-marsh', 'robin-yates'], 'west-cloakroom': ['hank-delgado', 'gus-whitfield'], 'east-cloakroom': ['naomi-cho', 'cyrus-boone'] } as const}{@const targetIds = roomScoutTargets[mapRoom.roomId]}<MapRoom {...mapRoom} discovered={Object.values(notebookSources).includes(mapRoom.source)} scoutAvailable={targetIds.every((id) => houseScoutTargets.includes(id))} scoutTargets={targetIds} playerSkinTone={playerSkinTone} playerPresentation={playerPresentation} playerParty={playerParty} ondiscover={discoverNotebookEntry} onnotebook={() => { notebookTab = 'entries'; notebookOpen = true; }} onscout={() => { const newTargets = targetIds.filter((id) => !houseScoutTargets.includes(id)); if (newTargets.length) { houseScoutTargets = [...houseScoutTargets, ...newTargets]; announcement = `Scout intel logged for ${newTargets.map((id) => houseEncounters.find((encounter) => encounter.id === id)?.name).join(' and ')}. Use the aide’s advice in their Rapport conversations.`; save(); } }} onreturn={() => returnFromHouseRoom(mapRoom!.roomId)} />{/if}
   {#if scoutLeaderId}<ScoutLeader leaderId={scoutLeaderId} oncomplete={finishScouting} onclose={() => scoutLeaderId = null} />{/if}
-  {#if landmarkCard}<LandmarkCard landmark={landmarkCard} onclose={() => landmarkCard = null} oncontinue={() => { const spot = landmarkCard; landmarkCard = null; if(spot==='capitol'){screen='rotunda';} else if(spot==='white-house'){if(whiteHouseUnlocked)screen='whiteHouse';else announcement='The White House opens after Congress passes the bill.';} else if(spot==='monument'){if((Math.floor(minutes/60)%24>=20||Math.floor(minutes/60)%24<6)&&notes.length>=100&&(encounteredQuestionIds.includes(37)||notebookQuestionIds.includes(37)))washingtonGhostOpen=true;else discoverNotebookEntry('Washington Monument tourist board');} else if(spot==='reflecting'){discoverNotebookEntry('Reflecting Pool visitor guide');} else if(spot==='lincoln'){discoverNotebookEntry('Lincoln Memorial visitor guide');} else if(spot==='smithsonian'){discoverNotebookEntry('Smithsonian museum guide');} else if(spot==='library'){hearGhostWhisper('washington');} else if(spot==='court'){hearGhostWhisper('lincoln');} else if(spot==='duncan'){meetDuncan();} else if(spot==='tourists'){touristPanelOpen=true;} else if(spot==='cafe'||spot==='press'){if(Math.floor(minutes/60)%24>=20||Math.floor(minutes/60)%24<6)nightAlternatesOpen=true;else touristPanelOpen=true;} }} />{/if}
-  {#if touristPanelOpen}<TouristEncounters claimed={touristClaims} onclaim={claimTouristPack} onclose={() => touristPanelOpen = false} />{/if}
+   {#if landmarkCard}<LandmarkCard landmark={landmarkCard} onclose={() => landmarkCard = null} oncontinue={() => { const spot = landmarkCard; landmarkCard = null; if(spot==='capitol'){screen='rotunda';} else if(spot==='white-house'){if(whiteHouseUnlocked)screen='whiteHouse';else announcement='The White House opens after Congress passes the bill.';} else if(spot==='monument'){if((Math.floor(minutes/60)%24>=20||Math.floor(minutes/60)%24<6)&&notes.length>=100&&(encounteredQuestionIds.includes(37)||notebookQuestionIds.includes(37)))washingtonGhostOpen=true;else discoverNotebookEntry('Washington Monument tourist board');} else if(spot==='reflecting'){discoverNotebookEntry('Reflecting Pool visitor guide');} else if(spot==='lincoln'){discoverNotebookEntry('Lincoln Memorial visitor guide');} else if(spot==='smithsonian'){discoverNotebookEntry('Smithsonian museum guide');} else if(spot==='library'){hearGhostWhisper('washington');} else if(spot==='court'){hearGhostWhisper('lincoln');} else if(spot==='duncan'){meetDuncan();} else if(spot==='tourists'){announcement='Walk up to any visitor with an exclamation point to begin a one-on-one conversation.';} else if(spot==='cafe'||spot==='press'){if(Math.floor(minutes/60)%24>=20||Math.floor(minutes/60)%24<6)nightAlternatesOpen=true;else announcement='Visitors nearby each have their own D.C. story to share.';} }} />{/if}
+   {#if touristPanelOpen && touristVisitorName}<TouristEncounters visitorName={touristVisitorName} claimed={touristClaims} onclaim={claimTouristPack} onclose={() => { touristPanelOpen = false; touristVisitorName = ''; }} />{/if}
   {#if nightAlternatesOpen}<DcNightAlternates {completed} onselect={beginNightAlternate} onclose={() => nightAlternatesOpen = false} />{/if}
   {#if washingtonGhostOpen}<WashingtonGhost hasPriorKnowledge={encounteredQuestionIds.includes(37) || notebookQuestionIds.includes(37)} oncomplete={finishWashingtonGhost} onclose={() => washingtonGhostOpen = false} />{/if}
   {#if lincolnGhostOpen}<LincolnGhost oncomplete={finishLincolnGhost} />{/if}
-  {#if notebookOpen}<Notebook entries={notes} initialTab={notebookTab} {seenVocabulary} {vocabularyEasterEggSeen} onviewvocabulary={viewVocabulary} onclose={() => notebookOpen = false} />{/if}
+   {#if notebookOpen}<Notebook entries={notes} initialTab={notebookTab} focusEntryIds={focusedNotebookEntryIds} {seenVocabulary} {vocabularyEasterEggSeen} onviewvocabulary={viewVocabulary} onclose={() => { notebookOpen = false; focusedNotebookEntryIds = []; }} />{/if}
   <div class="sr-only" aria-live="polite">{announcement}</div>
 {/if}

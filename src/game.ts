@@ -1,4 +1,5 @@
 import { civicsQuestions, type CivicsQuestion } from './civics-questions';
+import { isCorrectCivicsAnswer } from './civics-validation';
 
 export type Mode = 'multiple' | 'short' | 'matrix' | 'mumbled';
 
@@ -96,8 +97,9 @@ export const senateEncounters: Encounter[] = [
 ];
 
 export const requiredVotes = 218;
-export const worldWidth = 9200;
-export const worldHeight = 1900;
+// House Chamber master grid: 192 columns x 40 rows of 48px tiles.
+export const worldWidth = 9216;
+export const worldHeight = 1920;
 
 export type HouseVoteLedger = { committeeVotes: number; npcVotes: Record<string, number> };
 
@@ -271,6 +273,14 @@ export function questionChoices(question: CivicsQuestion, count: number) {
     127: ['A holiday honoring veterans', 'A holiday celebrating independence', 'A holiday honoring civil rights leaders'],
     128: ['A holiday honoring soldiers who died', 'A holiday celebrating independence', 'A holiday for workers']
   };
+  const personQuestion = /^(who\b|name one leader)/i.test(question.prompt) && !question.dynamic;
+  const numericQuestion = /how many|how long|how old|for how many|how many years/i.test(question.prompt);
+  const personDistractors = [
+    'George Washington', 'John Adams', 'Thomas Jefferson', 'James Madison', 'Benjamin Franklin',
+    'Abraham Lincoln', 'Frederick Douglass', 'Susan B. Anthony', 'Martin Luther King, Jr.',
+    'Eleanor Roosevelt', 'Dwight Eisenhower', 'Rosa Parks', 'Cesar Chavez', 'Thurgood Marshall'
+  ];
+  const numericDistractors = ['One (1)', 'Two (2)', 'Three (3)', 'Four (4)', 'Five (5)', 'Six (6)', 'Eight (8)', 'Nine (9)', 'Ten (10)', 'Twenty (20)', 'Fifty (50)', 'One hundred (100)', 'Four hundred thirty-five (435)'];
   const distractors = civicsQuestions
     .filter((candidate) => candidate.id !== question.id && !candidate.dynamic)
     .flatMap((candidate) => candidate.acceptedAnswers)
@@ -279,13 +289,23 @@ export function questionChoices(question: CivicsQuestion, count: number) {
   const allCorrect = new Set(question.acceptedAnswers.map((answer) => answer.toLowerCase()));
   const contextual = [...(houseDistractors[question.id] ?? []), ...(senateDistractors[question.id] ?? []), ...(topicalDistractors[question.id] ?? [])]
     .filter((answer) => !allCorrect.has(answer.toLowerCase()) && !choices.includes(answer));
-  for (const distractor of contextual) {
-    if (choices.length >= count) break;
+  const displayedChoices = new Set(choices.map((choice) => displayChoice(question, choice).toLowerCase()));
+  function addDistractor(distractor: string) {
+    const displayed = displayChoice(question, distractor).toLowerCase();
+    if (allCorrect.has(distractor.toLowerCase()) || displayedChoices.has(displayed) || isCorrectCivicsAnswer(question, displayChoice(question, distractor))) return;
     choices.push(distractor);
+    displayedChoices.add(displayed);
   }
 
-  for (let index = 0; choices.length < count && index < distractors.length; index += 1) {
-    choices.push(distractors[(question.id * 7 + index * 17) % distractors.length]);
+  for (const distractor of contextual) {
+    if (choices.length >= count) break;
+    addDistractor(distractor);
+  }
+
+  const fallback = personQuestion ? personDistractors : numericQuestion ? numericDistractors : distractors;
+  for (let index = 0; choices.length < count && index < fallback.length; index += 1) {
+    const distractor = fallback[(question.id * 7 + index * 17) % fallback.length];
+    addDistractor(distractor);
   }
 
   return choices.sort((left, right) => (left.length + question.id) % 5 - (right.length + question.id) % 5);
@@ -316,7 +336,11 @@ export function displayChoice(question: CivicsQuestion, choice: string) {
     const words = parentheticalWord
       ? parentheticalWord.toLowerCase()
       : numberToWords(Number(parentheticalNumber ?? plainNumber));
-    if (words) return `${words[0].toUpperCase()}${words.slice(1)}`;
+    if (words) {
+      const unit = choice.match(/\)\s*(years?|members?|amendments?|seats?)/i)?.[1];
+      const formatted = `${words[0].toUpperCase()}${words.slice(1)}`;
+      return unit ? `${formatted} ${unit.toLowerCase()}` : formatted;
+    }
   }
 
   // Parenthetical USCIS notation is useful in the source PDF, but it makes one

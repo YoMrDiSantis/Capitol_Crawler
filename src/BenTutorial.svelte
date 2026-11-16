@@ -34,6 +34,10 @@
       text: 'The Shop has three useful items: Coffee pauses a timer, a Talking Points Memo removes one wrong multiple-choice answer, and a Hearing Aid clears part of a mumbled question. They are optional, but it pays to be prepared.'
     },
     {
+      title: 'SUPER PAC',
+      text: 'The Shop also offers one high-stakes option: a Super PAC. It is expensive, and you may carry two. Use one before the House Committee hearing to secure a stronger hearing, or save one for a Senate Filibuster. In the Cloakroom Subway, it clears five Rogue Nodes at once. It is a contingency tool, never required to finish the campaign.'
+    },
+    {
       title: 'START WITH WREN',
       text: benVenelloDialogue.opening[4].text
     }

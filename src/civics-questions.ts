@@ -189,7 +189,7 @@ export const civicsQuestions: CivicsQuestion[] = [
     "acceptedAnswers": [
       "So one part does not become too powerful",
       "Checks and balances",
-      "Separation of powers B: System of Government"
+      "Separation of powers"
     ],
     "category": "government",
     "dynamic": false,
@@ -717,7 +717,7 @@ export const civicsQuestions: CivicsQuestion[] = [
     "id": 62,
     "prompt": "What is the capital of your state?",
     "acceptedAnswers": [
-      "Answers will vary. [District of Columbia residents should answer that D.C. is not a state and does not have a capital. Residents of U.S. territories should name the capital of the territory.] C: Rights and Responsibilities"
+      "Answers will vary. [District of Columbia residents should answer that D.C. is not a state and does not have a capital. Residents of U.S. territories should name the capital of the territory.]"
     ],
     "category": "government",
     "dynamic": true,
